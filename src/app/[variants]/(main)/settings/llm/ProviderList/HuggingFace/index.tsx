@@ -1,12 +1,11 @@
 'use client';
 
-import { Markdown } from '@lobehub/ui';
-import { Input } from 'antd';
+import { GlobalLLMProviderKey } from '@lobechat/types';
+import { InputPassword, Markdown } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { useTranslation } from 'react-i18next';
 
 import { HuggingFaceProviderCard } from '@/config/modelProviders';
-import { GlobalLLMProviderKey } from '@/types/user/settings';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey } from '../../const';
 import { ProviderItem } from '../../type';
@@ -35,7 +34,7 @@ export const useHuggingFaceProvider = (): ProviderItem => {
     apiKeyItems: [
       {
         children: (
-          <Input.Password
+          <InputPassword
             autoComplete={'new-password'}
             placeholder={t(`${providerKey}.accessToken.placeholder`)}
           />

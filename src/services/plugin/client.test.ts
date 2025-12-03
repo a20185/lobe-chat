@@ -1,10 +1,10 @@
+import { LobeTool } from '@lobechat/types';
 import { LobeChatPluginManifest } from '@lobehub/chat-plugin-sdk';
 import { eq } from 'drizzle-orm';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 
 import { clientDB, initializeDB } from '@/database/client/db';
 import { userInstalledPlugins, users } from '@/database/schemas';
-import { LobeTool } from '@/types/tool';
 import { LobeToolCustomPlugin } from '@/types/tool/plugin';
 
 import { ClientService } from './client';
@@ -159,7 +159,9 @@ describe('PluginService', () => {
       // Arrange
       const id = 'plugin-id';
       const settings = { color: 'blue' };
-      await clientDB.insert(userInstalledPlugins).values([{ identifier: id, type: 'plugin', userId }]);
+      await clientDB
+        .insert(userInstalledPlugins)
+        .values([{ identifier: id, type: 'plugin', userId }]);
 
       // Act
       await pluginService.updatePluginSettings(id, settings);

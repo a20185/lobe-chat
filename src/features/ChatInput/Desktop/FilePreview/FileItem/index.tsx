@@ -1,5 +1,4 @@
-import { ActionIcon } from '@lobehub/ui';
-import { Typography } from 'antd';
+import { ActionIcon, Block, Text } from '@lobehub/ui';
 import { createStyles } from 'antd-style';
 import { Trash2Icon } from 'lucide-react';
 import { memo } from 'react';
@@ -11,7 +10,6 @@ import { UploadFileItem } from '@/types/files/upload';
 
 import UploadDetail from '../../../components/UploadDetail';
 import Content from './Content';
-import { FILE_ITEM_SIZE } from './style';
 
 const useStyles = createStyles(({ css, token }) => ({
   actions: css`
@@ -28,14 +26,13 @@ const useStyles = createStyles(({ css, token }) => ({
       ${token.boxShadowTertiary};
   `,
   container: css`
+    user-select: none;
+
     position: relative;
 
-    width: ${FILE_ITEM_SIZE}px;
-    min-width: ${FILE_ITEM_SIZE}px;
-    height: ${FILE_ITEM_SIZE}px;
+    width: 180px;
+    height: 64px;
     border-radius: 8px;
-
-    background: ${token.colorBgContainer};
   `,
   image: css`
     margin-block: 0 !important;
@@ -50,8 +47,6 @@ const useStyles = createStyles(({ css, token }) => ({
 
 type FileItemProps = UploadFileItem;
 
-const spacing = 8;
-
 const FileItem = memo<FileItemProps>((props) => {
   const { file, uploadState, status, id, tasks } = props;
   const { t } = useTranslation(['chat', 'common']);
@@ -59,15 +54,28 @@ const FileItem = memo<FileItemProps>((props) => {
   const [removeChatUploadFile] = useFileStore((s) => [s.removeChatUploadFile]);
 
   return (
-    <Flexbox className={styles.container} distribution={'space-between'}>
-      <Center flex={1} height={FILE_ITEM_SIZE - 46} padding={spacing}>
+    <Block align={'center'} className={styles.container} horizontal variant={'outlined'}>
+      <Center flex={1} height={64} padding={4} style={{ maxWidth: 64 }}>
         <Content {...props} />
       </Center>
-      <Flexbox gap={4} style={{ paddingBottom: 4, paddingInline: spacing }}>
-        <Typography.Text ellipsis={{ tooltip: true }} style={{ fontSize: 12 }}>
+      <Flexbox flex={1} gap={4} style={{ paddingBottom: 4, paddingInline: 4 }}>
+        <Text
+          ellipsis={{
+            tooltip: {
+              styles: {
+                body: {
+                  fontSize: 12,
+                  whiteSpace: 'balance',
+                  wordBreak: 'break-all',
+                },
+              },
+              title: file.name,
+            },
+          }}
+          style={{ fontSize: 12, maxWidth: 88 }}
+        >
           {file.name}
-        </Typography.Text>
-
+        </Text>
         <UploadDetail size={file.size} status={status} tasks={tasks} uploadState={uploadState} />
       </Flexbox>
       <Flexbox className={styles.actions}>
@@ -81,7 +89,7 @@ const FileItem = memo<FileItemProps>((props) => {
           title={t('delete', { ns: 'common' })}
         />
       </Flexbox>
-    </Flexbox>
+    </Block>
   );
 });
 

@@ -21,30 +21,34 @@ module.exports = async ({ github, context, releaseUrl, version, tag }) => {
       // Organize assets by platform
       const macAssets = release.data.assets.filter(
         (asset) =>
-          ((asset.name.includes('.dmg') || asset.name.includes('.zip')) &&
-            !asset.name.includes('.blockmap')) ||
-          (asset.name.includes('latest-mac') && asset.name.endsWith('.yml')),
+          (asset.name.includes('.dmg') || asset.name.includes('.zip')) &&
+          !asset.name.includes('.blockmap'),
       );
 
       const winAssets = release.data.assets.filter(
-        (asset) =>
-          (asset.name.includes('.exe') && !asset.name.includes('.blockmap')) ||
-          (asset.name.includes('latest-win') && asset.name.endsWith('.yml')),
+        (asset) => asset.name.includes('.exe') && !asset.name.includes('.blockmap'),
       );
 
       const linuxAssets = release.data.assets.filter(
-        (asset) =>
-          (asset.name.includes('.AppImage') && !asset.name.includes('.blockmap')) ||
-          (asset.name.includes('latest-linux') && asset.name.endsWith('.yml')),
+        (asset) => asset.name.includes('.AppImage') && !asset.name.includes('.blockmap'),
       );
 
       // Generate combined download table
       let assetTable = '| Platform | File | Size |\n| --- | --- | --- |\n';
 
-      // Add macOS assets
+      // Add macOS assets with architecture detection
       macAssets.forEach((asset) => {
         const sizeInMB = (asset.size / (1024 * 1024)).toFixed(2);
-        assetTable += `| macOS | [${asset.name}](${asset.browser_download_url}) | ${sizeInMB} MB |\n`;
+
+        // Detect architecture from filename
+        let architecture = '';
+        if (asset.name.includes('arm64')) {
+          architecture = ' (Apple Silicon)';
+        } else if (asset.name.includes('x64') || asset.name.includes('-mac.')) {
+          architecture = ' (Intel)';
+        }
+
+        assetTable += `| macOS${architecture} | [${asset.name}](${asset.browser_download_url}) | ${sizeInMB} MB |\n`;
       });
 
       // Add Windows assets

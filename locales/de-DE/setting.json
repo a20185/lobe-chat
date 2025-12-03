@@ -35,9 +35,16 @@
       "title": "Alle Einstellungen zurücksetzen"
     }
   },
+  "groupTab": {
+    "chat": "Chat",
+    "members": "Mitglieder",
+    "meta": "Grundinformationen"
+  },
   "header": {
     "desc": "Präferenzen und Modellkonfigurationen.",
     "global": "Global Einstellungen",
+    "group": "Team-Einstellungen",
+    "groupDesc": "Verwalten Sie Agent-Teams und Chat-Einstellungen",
     "session": "Sitzungseinstellungen",
     "sessionDesc": "Rollenkonfiguration und Sitzungspräferenzen.",
     "sessionWithName": "Sitzungseinstellungen · {{name}}",
@@ -45,14 +52,25 @@
   },
   "hotkey": {
     "conflicts": "Konflikte mit bestehenden Tastenkombinationen",
+    "errors": {
+      "CONFLICT": "Tastenkonflikt: Diese Tastenkombination wird bereits von einer anderen Funktion verwendet",
+      "INVALID_FORMAT": "Ungültiges Tastenkürzel-Format: Bitte verwenden Sie das korrekte Format (z. B. CommandOrControl+E)",
+      "INVALID_ID": "Ungültige Tastenkürzel-ID",
+      "NO_MODIFIER": "Das Tastenkürzel muss einen Modifikatortaste enthalten (Strg, Alt, Shift usw.)",
+      "SYSTEM_OCCUPIED": "Das Tastenkürzel wird vom System oder einer anderen Anwendung verwendet",
+      "UNKNOWN": "Aktualisierung fehlgeschlagen: Unbekannter Fehler"
+    },
     "group": {
       "conversation": "Gespräch",
+      "desktop": "Desktop",
       "essential": "Grundlegend"
     },
     "invalidCombination": "Die Tastenkombination muss mindestens einen Modifikatortaste (Strg, Alt, Umschalt) und eine normale Taste enthalten",
     "record": "Drücken Sie eine Taste, um die Tastenkombination aufzuzeichnen",
     "reset": "Auf die Standard-Tastenkombination zurücksetzen",
-    "title": "Tastenkombinationen"
+    "title": "Tastenkombinationen",
+    "updateError": "Tastenkürzel-Aktualisierung fehlgeschlagen: Netzwerk- oder Systemfehler",
+    "updateSuccess": "Tastenkürzel erfolgreich aktualisiert"
   },
   "llm": {
     "aesGcm": "Ihr Schlüssel und Ihre Proxy-Adresse werden mit dem <1>AES-GCM</1> Verschlüsselungsalgorithmus verschlüsselt.",
@@ -128,7 +146,11 @@
     },
     "waitingForMore": "Weitere Modelle werden <1>geplant</1>, bitte freuen Sie sich auf weitere Updates"
   },
+  "message": {
+    "success": "Erfolgreich aktualisiert"
+  },
   "plugin": {
+    "addMCPPlugin": "MCP-Plugin hinzufügen",
     "addTooltip": "Benutzerdefiniertes Plugin",
     "clearDeprecated": "Entfernen Sie ungültige Plugins",
     "empty": "Keine installierten Plugins vorhanden. Besuchen Sie den <1>Plugin-Store</1>, um mehr zu entdecken.",
@@ -150,6 +172,7 @@
       "title": "Hintergrundfarbe"
     },
     "description": {
+      "desc": "Eine kurze Einführung in deinen Assistenten, nicht als Rolleneinstellung",
       "placeholder": "Bitte geben Sie eine Assistentenbeschreibung ein",
       "title": "Assistentenbeschreibung"
     },
@@ -161,11 +184,38 @@
       "placeholder": "Bitte geben Sie das Rollen-Prompt-Wort ein",
       "title": "Rollen-Einstellung"
     },
+    "submit": "Assistenteninformationen aktualisieren",
     "tag": {
+      "desc": "Die Assistenten-Tags werden im Assistentenmarkt angezeigt",
       "placeholder": "Bitte geben Sie ein Tag ein",
       "title": "Tag"
     },
     "title": "Assistenteninformationen"
+  },
+  "settingAppearance": {
+    "animationMode": {
+      "agile": "Agil",
+      "desc": "Wählen Sie die Animationsgeschwindigkeit für die Reaktion der Anwendung",
+      "disabled": "Aus",
+      "elegant": "Elegant",
+      "title": "Reaktionsanimation"
+    },
+    "neutralColor": {
+      "desc": "Anpassung der Graustufen mit unterschiedlichen Farbneigungen",
+      "title": "Neutrale Farben"
+    },
+    "noAnimation": {
+      "desc": "Deaktivieren Sie alle Animationseffekte in der Anwendung",
+      "title": "Kein Animationsmodus"
+    },
+    "preview": {
+      "title": "Farbauswahl"
+    },
+    "primaryColor": {
+      "desc": "Benutzerdefinierte Hauptfarbe",
+      "title": "Hauptfarbe"
+    },
+    "title": "Anwendungsdesign"
   },
   "settingChat": {
     "autoCreateTopicThreshold": {
@@ -197,6 +247,10 @@
       "title": "Historiennachrichten begrenzen",
       "unlimited": "Unbegrenzte Historiennachrichten"
     },
+    "enableStreaming": {
+      "desc": "Aktivieren Sie den Streaming-Ausgang, um Antworten in Echtzeit anzuzeigen. Wenn deaktiviert, wird nur die vollständige Antwort angezeigt.",
+      "title": "Streaming-Ausgabe aktivieren"
+    },
     "historyCount": {
       "desc": "Anzahl der Nachrichten pro Anfrage (einschließlich der neuesten Fragen und Antworten. Jede Frage und Antwort zählt als 1)",
       "title": "Anzahl der mitgelieferten Nachrichten"
@@ -206,14 +260,159 @@
       "placeholder": "Vorlagen-{{text}} werden durch Echtzeit-Eingabeinformationen ersetzt",
       "title": "Benutzereingabe-Vorverarbeitung"
     },
+    "submit": "Chat-Präferenzen aktualisieren",
     "title": "Chat-Einstellungen"
+  },
+  "settingChatAppearance": {
+    "fontSize": {
+      "desc": "Schriftgröße des Chatinhalts",
+      "marks": {
+        "normal": "Standard"
+      },
+      "title": "Schriftgröße"
+    },
+    "highlighterTheme": {
+      "title": "Code-Hervorhebungsthema"
+    },
+    "mermaidTheme": {
+      "title": "Mermaid-Thema"
+    },
+    "title": "Chatdesign",
+    "transitionMode": {
+      "desc": "Übergangsanimation der Chatnachrichten",
+      "options": {
+        "fadeIn": "Einblenden",
+        "none": {
+          "desc": "Dies hängt von der Art der Antwort des Modells ab, bitte testen Sie es selbst.",
+          "value": "Keine"
+        },
+        "smooth": "Sanft"
+      },
+      "title": "Übergangsanimation"
+    }
+  },
+  "settingCommon": {
+    "lang": {
+      "autoMode": "System folgen",
+      "title": "Sprache"
+    },
+    "themeMode": {
+      "auto": "Automatisch",
+      "dark": "Dunkel",
+      "light": "Hell",
+      "title": "Thema"
+    },
+    "title": "Allgemeine Einstellungen"
+  },
+  "settingGroup": {
+    "description": {
+      "placeholder": "Bitte geben Sie eine Team-Beschreibung ein",
+      "title": "Team-Beschreibung"
+    },
+    "name": {
+      "placeholder": "Bitte geben Sie einen Teamnamen ein",
+      "title": "Teamname"
+    },
+    "scene": {
+      "desc": "Wählen Sie ein Teamszenario",
+      "options": {
+        "casual": "Freizeit",
+        "productive": "Produktivität"
+      },
+      "title": "Teamszenario"
+    },
+    "submit": "Team aktualisieren",
+    "systemPrompt": {
+      "placeholder": "Bitte geben Sie den Systemhinweis für den Moderator ein",
+      "title": "Systemhinweis des Moderators"
+    },
+    "title": "Agent-Teaminformationen"
+  },
+  "settingGroupChat": {
+    "allowDM": {
+      "desc": "Wenn deaktiviert, kannst du dem Assistenten weiterhin direkt Nachrichten senden",
+      "title": "Direktnachrichten vom Assistenten erlauben"
+    },
+    "enableSupervisor": {
+      "desc": "Aktivieren Sie die Moderatorfunktion für das Agent-Team. Moderatoren verwalten den Gesprächsverlauf des Teams.",
+      "title": "Moderator aktivieren"
+    },
+    "maxResponseInRow": {
+      "desc": "Wählen Sie, wie viele Nachrichten ein Mitglied hintereinander antworten kann. Setzen Sie auf 0, um diese Begrenzung zu deaktivieren.",
+      "title": "Anzahl der aufeinanderfolgenden Antworten"
+    },
+    "model": {
+      "desc": "Beiträge von Gruppenmitgliedern bleiben unbeeinträchtigt. Einige Modelle können nicht als Moderatoren verwendet werden.",
+      "title": "Moderator-Modell"
+    },
+    "orchestratorTitle": "Moderatoreinstellungen",
+    "responseOrder": {
+      "desc": "Agenten antworten in der im Chat festgelegten Reihenfolge",
+      "options": {
+        "natural": "Natürlich",
+        "sequential": "Sequenziell"
+      },
+      "placeholder": "Antwortreihenfolge wählen",
+      "title": "Antwortreihenfolge"
+    },
+    "responseSpeed": {
+      "desc": "Steuern Sie die allgemeine Geschwindigkeit des Gesprächs",
+      "options": {
+        "fast": "Schnell",
+        "medium": "Mittel",
+        "slow": "Langsam"
+      },
+      "placeholder": "Antwortgeschwindigkeit wählen",
+      "title": "Antwortgeschwindigkeit"
+    },
+    "revealDM": {
+      "desc": "Macht private Nachrichten, die an andere Mitglieder gesendet wurden, für Sie sichtbar.",
+      "title": "Private Nachrichten anzeigen"
+    },
+    "submit": "Einstellungen aktualisieren",
+    "systemPrompt": {
+      "desc": "Benutzerdefinierter Systemhinweis für den Moderator des Gruppenchats. Dies kann das Standardverhalten des Moderators beeinflussen.",
+      "placeholder": "Bitte geben Sie einen benutzerdefinierten Systemhinweis für den Moderator ein...",
+      "title": "Systemhinweis des Moderators"
+    },
+    "title": "Chat-Einstellungen"
+  },
+  "settingGroupMembers": {
+    "addToGroup": "Zur Gruppe hinzufügen",
+    "availableAgents": "Verfügbare Assistenten",
+    "createMember": "Mitglied erstellen",
+    "defaultAgent": "Benutzerdefinierter Assistent",
+    "disableHost": "Moderator-Assistent deaktivieren",
+    "edit": "Mitglieder bearbeiten",
+    "empty": "Dieses Team hat derzeit keine Mitglieder. Klicken Sie auf die + Schaltfläche, um Mitglieder hinzuzufügen.",
+    "enableHost": "Moderator-Assistent aktivieren",
+    "groupHost": "Gruppenmoderator",
+    "groupMembers": "Gruppenmitglieder",
+    "host": {
+      "description": "Wenn der Moderator in der Gruppe ist, läuft der Gruppenchat automatisiert, geeignet für kreative Aufgaben.",
+      "title": "Moderator"
+    },
+    "noAvailableAgents": "Keine verfügbaren Assistenten",
+    "noDescription": "Keine Beschreibung vorhanden",
+    "noMembersInGroup": "Keine Mitglieder in der Gruppe",
+    "owner": "Sie (Eigentümer)",
+    "remove": "Mitglied entfernen",
+    "removeFromGroup": "Aus der Gruppe entfernen",
+    "you": "Sie"
+  },
+  "settingImage": {
+    "defaultCount": {
+      "desc": "Legen Sie die Standardanzahl der Bilder fest, die beim Erstellen einer neuen Aufgabe im Bildgenerierungs-Panel erzeugt werden.",
+      "label": "Standardanzahl der Bilder",
+      "title": "AI-Zeichnungseinstellungen"
+    }
   },
   "settingModel": {
     "enableMaxTokens": {
       "title": "Maximale Token pro Antwort aktivieren"
     },
     "enableReasoningEffort": {
-      "title": "Aktivieren Sie die Anpassung der Schlussfolgerungsintensität"
+      "title": "Aktivieren der Anpassung der Schlussfolgerungsintensität"
     },
     "frequencyPenalty": {
       "desc": "Je höher der Wert, desto vielfältiger und abwechslungsreicher die Wortwahl; je niedriger der Wert, desto einfacher und schlichter die Wortwahl",
@@ -235,7 +434,7 @@
       "title": "Ausdrucksvielfalt"
     },
     "reasoningEffort": {
-      "desc": "Je höher der Wert, desto stärker die Schlussfolgerungsfähigkeit, aber dies kann die Antwortzeit und den Tokenverbrauch erhöhen.",
+      "desc": "Je höher der Wert, desto stärker die Schlussfolgerungsfähigkeit, kann jedoch die Antwortzeit und den Token-Verbrauch erhöhen",
       "options": {
         "high": "Hoch",
         "low": "Niedrig",
@@ -243,6 +442,7 @@
       },
       "title": "Schlussfolgerungsintensität"
     },
+    "submit": "Modell-Einstellungen aktualisieren",
     "temperature": {
       "desc": "Je höher der Wert, desto kreativer und einfallsreicher die Antworten; je niedriger der Wert, desto strenger die Antworten",
       "title": "Kreativitätsgrad",
@@ -319,6 +519,7 @@
       "desc": "Browser ist ein nativer Spracherkennungsdienst des Browsers",
       "title": "Spracherkennungsdienst"
     },
+    "submit": "Sprachdienst aktualisieren",
     "title": "Sprachdienste",
     "tts": "Sprachsynthese-Einstellungen",
     "ttsService": {
@@ -330,37 +531,6 @@
       "preview": "Stimme anhören",
       "title": "Sprachsynthese-Stimme"
     }
-  },
-  "settingTheme": {
-    "avatar": {
-      "title": "Profilbild"
-    },
-    "fontSize": {
-      "desc": "Schriftgröße für Chat-Inhalte",
-      "marks": {
-        "normal": "Normal"
-      },
-      "title": "Schriftgröße"
-    },
-    "lang": {
-      "autoMode": "Systemsprache folgen",
-      "title": "Sprache"
-    },
-    "neutralColor": {
-      "desc": "Benutzerdefinierte Graustufen für verschiedene Farbneigungen",
-      "title": "Neutralfarbe"
-    },
-    "primaryColor": {
-      "desc": "Benutzerdefinierte Hauptfarbe des Themas",
-      "title": "Hauptfarbe"
-    },
-    "themeMode": {
-      "auto": "Automatisch",
-      "dark": "Dunkel",
-      "light": "Hell",
-      "title": "Thema"
-    },
-    "title": "Thema einstellen"
   },
   "storage": {
     "actions": {
@@ -395,6 +565,12 @@
     "metaMiss": "Bitte vervollständigen Sie die Assistenteninformationen, einschließlich Name, Beschreibung und Tags, bevor Sie sie einreichen.",
     "placeholder": "Geben Sie die Kennung des Assistenten ein, die eindeutig sein muss, z. B. Web-Entwicklung",
     "tooltips": "Auf dem Assistentenmarkt teilen"
+  },
+  "submitFooter": {
+    "reset": "Zurücksetzen",
+    "submit": "Speichern",
+    "unSaved": "Nicht gespeicherte Änderungen",
+    "unSavedWarning": "Es gibt derzeit nicht gespeicherte Änderungen"
   },
   "sync": {
     "device": {
@@ -447,6 +623,12 @@
       "placeholder": "Bitte benutzerdefinierte Eingabe eingeben",
       "title": "Benutzerdefinierte Eingabe"
     },
+    "generationTopic": {
+      "label": "Modell zur Benennung von KI-Malthemen",
+      "modelDesc": "Modell zur automatischen Benennung von Themen für KI-Malerei",
+      "title": "Automatische Benennung von KI-Malthemen"
+    },
+    "helpInfo": "Beim Erstellen eines neuen Assistenten werden die Standardassistenteneinstellungen als Voreinstellungen verwendet.",
     "historyCompress": {
       "label": "Gesprächshistorienmodell",
       "modelDesc": "Das Modell, das zur Komprimierung der Gesprächshistorie verwendet wird",
@@ -480,8 +662,10 @@
     "common": "Allgemeine Einstellungen",
     "experiment": "Experiment",
     "hotkey": "Tastenkombinationen",
+    "image": "AI-Zeichnung",
     "llm": "Sprachmodell",
     "provider": "KI-Dienstanbieter",
+    "proxy": "Netzwerkproxy",
     "storage": "Datenspeicher",
     "sync": "Cloud-Synchronisierung",
     "system-agent": "Systemassistent",

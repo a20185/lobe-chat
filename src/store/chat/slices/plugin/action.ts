@@ -1,26 +1,26 @@
 /* eslint-disable sort-keys-fix/sort-keys-fix, typescript-sort-keys/interface */
-import { PluginErrorType } from '@lobehub/chat-plugin-sdk';
+import { ToolNameResolver } from '@lobechat/context-engine';
+import {
+  ChatErrorType,
+  ChatMessageError,
+  ChatToolPayload,
+  CreateMessageParams,
+  MessageToolCall,
+  ToolsCallingContext,
+  UIChatMessage,
+} from '@lobechat/types';
+import { LobeChatPluginManifest, PluginErrorType } from '@lobehub/chat-plugin-sdk';
 import isEqual from 'fast-deep-equal';
 import { t } from 'i18next';
-import { Md5 } from 'ts-md5';
 import { StateCreator } from 'zustand/vanilla';
 
-import { LOADING_FLAT } from '@/const/message';
-import { PLUGIN_SCHEMA_API_MD5_PREFIX, PLUGIN_SCHEMA_SEPARATOR } from '@/const/plugin';
 import { chatService } from '@/services/chat';
+import { mcpService } from '@/services/mcp';
 import { messageService } from '@/services/message';
 import { ChatStore } from '@/store/chat/store';
 import { useToolStore } from '@/store/tool';
 import { pluginSelectors } from '@/store/tool/selectors';
 import { builtinTools } from '@/tools';
-import { ChatErrorType } from '@/types/fetch';
-import {
-  ChatMessage,
-  ChatMessageError,
-  ChatToolPayload,
-  CreateMessageParams,
-  MessageToolCall,
-} from '@/types/message';
 import { merge } from '@/utils/merge';
 import { safeParseJSON } from '@/utils/safeParseJSON';
 import { setNamespace } from '@/utils/storeDebug';
@@ -41,6 +41,7 @@ export interface ChatPluginAction {
   invokeBuiltinTool: (id: string, payload: ChatToolPayload) => Promise<void>;
   invokeDefaultTypePlugin: (id: string, payload: any) => Promise<string | undefined>;
   invokeMarkdownTypePlugin: (id: string, payload: ChatToolPayload) => Promise<void>;
+  invokeMCPTypePlugin: (id: string, payload: ChatToolPayload) => Promise<string | undefined>;
 
   invokeStandaloneTypePlugin: (id: string, payload: ChatToolPayload) => Promise<void>;
 
@@ -54,6 +55,9 @@ export interface ChatPluginAction {
   }) => Promise<void>;
   summaryPluginContent: (id: string) => Promise<void>;
 
+  /**
+   * @deprecated V1 method
+   */
   triggerToolCalls: (
     id: string,
     params?: { threadId?: string; inPortalThread?: boolean; inSearchWorkflow?: boolean },
@@ -77,6 +81,7 @@ export interface ChatPluginAction {
   ) => AbortController | undefined;
   internal_transformToolCalls: (toolCalls: MessageToolCall[]) => ChatToolPayload[];
   internal_updatePluginError: (id: string, error: ChatMessageError) => Promise<void>;
+  internal_constructToolsCallingContext: (id: string) => ToolsCallingContext | undefined;
 }
 
 export const chatPlugin: StateCreator<
@@ -242,7 +247,7 @@ export const chatPlugin: StateCreator<
           name: undefined,
           tool_call_id: undefined,
         },
-      ] as ChatMessage[],
+      ] as UIChatMessage[],
       message.id,
     );
   },
@@ -255,7 +260,7 @@ export const chatPlugin: StateCreator<
     let latestToolId = '';
     const messagePools = message.tools.map(async (payload) => {
       const toolMessage: CreateMessageParams = {
-        content: LOADING_FLAT,
+        content: '',
         parentId: assistantId,
         plugin: payload,
         role: 'tool',
@@ -263,6 +268,7 @@ export const chatPlugin: StateCreator<
         tool_call_id: payload.id,
         threadId,
         topicId: get().activeTopicId, // if there is activeTopicId，then add it to topicId
+        groupId: message.groupId, // Propagate groupId from parent message for group chat
       };
 
       const id = await get().internal_createMessage(toolMessage);
@@ -271,13 +277,15 @@ export const chatPlugin: StateCreator<
       // trigger the plugin call
       const data = await get().internal_invokeDifferentTypePlugin(id, payload);
 
-      if ((payload.type === 'default' || payload.type === 'builtin') && data) {
+      if (data && !['markdown', 'standalone'].includes(payload.type)) {
         shouldCreateMessage = true;
         latestToolId = id;
       }
     });
 
     await Promise.all(messagePools);
+
+    await get().internal_toggleMessageInToolsCalling(false, assistantId);
 
     // only default type tool calls should trigger AI message
     if (!shouldCreateMessage) return;
@@ -328,7 +336,9 @@ export const chatPlugin: StateCreator<
 
     const updateAssistantMessage = async () => {
       if (!assistantMessage) return;
-      await messageService.updateMessage(assistantMessage!.id, { tools: assistantMessage?.tools });
+      await messageService.updateMessage(assistantMessage!.id, {
+        tools: assistantMessage?.tools,
+      });
     };
 
     await Promise.all([
@@ -438,10 +448,57 @@ export const chatPlugin: StateCreator<
         return await get().invokeBuiltinTool(id, payload);
       }
 
+      // @ts-ignore
+      case 'mcp': {
+        return await get().invokeMCPTypePlugin(id, payload);
+      }
+
       default: {
         return await get().invokeDefaultTypePlugin(id, payload);
       }
     }
+  },
+  invokeMCPTypePlugin: async (id, payload) => {
+    const {
+      internal_updateMessageContent,
+      refreshMessages,
+      internal_togglePluginApiCalling,
+      internal_constructToolsCallingContext,
+    } = get();
+    let data: string = '';
+
+    try {
+      const abortController = internal_togglePluginApiCalling(
+        true,
+        id,
+        n('fetchPlugin/start') as string,
+      );
+
+      const context = internal_constructToolsCallingContext(id);
+      const result = await mcpService.invokeMcpToolCall(payload, {
+        signal: abortController?.signal,
+        topicId: context?.topicId,
+      });
+
+      if (!!result) data = result;
+    } catch (error) {
+      console.log(error);
+      const err = error as Error;
+
+      // ignore the aborted request error
+      if (!err.message.includes('The user aborted a request.')) {
+        await messageService.updateMessageError(id, error as any);
+        await refreshMessages();
+      }
+    }
+
+    internal_togglePluginApiCalling(false, id, n('fetchPlugin/end') as string);
+    // 如果报错则结束了
+    if (!data) return;
+
+    await internal_updateMessageContent(id, data);
+
+    return data;
   },
 
   internal_togglePluginApiCalling: (loading, id, action) => {
@@ -449,36 +506,28 @@ export const chatPlugin: StateCreator<
   },
 
   internal_transformToolCalls: (toolCalls) => {
-    return toolCalls
-      .map((toolCall): ChatToolPayload | null => {
-        let payload: ChatToolPayload;
+    const toolNameResolver = new ToolNameResolver();
 
-        const [identifier, apiName, type] = toolCall.function.name.split(PLUGIN_SCHEMA_SEPARATOR);
+    // Build manifests map from tool store
+    const toolStoreState = useToolStore.getState();
+    const manifests: Record<string, LobeChatPluginManifest> = {};
 
-        if (!apiName) return null;
+    // Get all installed plugins
+    const installedPlugins = pluginSelectors.installedPlugins(toolStoreState);
+    for (const plugin of installedPlugins) {
+      if (plugin.manifest) {
+        manifests[plugin.identifier] = plugin.manifest as LobeChatPluginManifest;
+      }
+    }
 
-        payload = {
-          apiName,
-          arguments: toolCall.function.arguments,
-          id: toolCall.id,
-          identifier,
-          type: (type ?? 'default') as any,
-        };
+    // Get all builtin tools
+    for (const tool of builtinTools) {
+      if (tool.manifest) {
+        manifests[tool.identifier] = tool.manifest as LobeChatPluginManifest;
+      }
+    }
 
-        // if the apiName is md5, try to find the correct apiName in the plugins
-        if (apiName.startsWith(PLUGIN_SCHEMA_API_MD5_PREFIX)) {
-          const md5 = apiName.replace(PLUGIN_SCHEMA_API_MD5_PREFIX, '');
-          const manifest = pluginSelectors.getToolManifestById(identifier)(useToolStore.getState());
-
-          const api = manifest?.api.find((api) => Md5.hashStr(api.name).toString() === md5);
-          if (api) {
-            payload.apiName = api.name;
-          }
-        }
-
-        return payload;
-      })
-      .filter(Boolean) as ChatToolPayload[];
+    return toolNameResolver.resolve(toolCalls, manifests);
   },
   internal_updatePluginError: async (id, error) => {
     const { refreshMessages } = get();
@@ -486,5 +535,14 @@ export const chatPlugin: StateCreator<
     get().internal_dispatchMessage({ id, type: 'updateMessage', value: { error } });
     await messageService.updateMessage(id, { error });
     await refreshMessages();
+  },
+
+  internal_constructToolsCallingContext: (id: string) => {
+    const message = chatSelectors.getMessageById(id)(get());
+    if (!message) return;
+
+    return {
+      topicId: message.topicId,
+    };
   },
 });

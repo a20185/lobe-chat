@@ -64,7 +64,7 @@ const GroupItem = memo<SessionGroupItem>(({ id, name }) => {
           onChangeEnd={async (input) => {
             if (name !== input) {
               if (!input) return;
-              if (input.length === 0 || input.length > 20)
+              if (input.length === 0 || input.length > 20 || input.trim() === '')
                 return message.warning(t('sessionGroup.tooLong'));
 
               await updateSessionGroupName(id, input);
@@ -74,11 +74,7 @@ const GroupItem = memo<SessionGroupItem>(({ id, name }) => {
           }}
           onEditingChange={(e) => setEditing(e)}
           showEditIcon={false}
-          size={'small'}
-          style={{
-            height: 28,
-          }}
-          type={'pure'}
+          style={{ height: 28 }}
           value={name}
         />
       )}

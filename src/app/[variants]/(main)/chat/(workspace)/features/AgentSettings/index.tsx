@@ -1,22 +1,19 @@
 'use client';
 
-import { Drawer } from 'antd';
-import { useResponsive, useTheme } from 'antd-style';
+import { Drawer } from '@lobehub/ui';
 import isEqual from 'fast-deep-equal';
-import { memo, useRef, useState } from 'react';
+import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import Header from '@/app/[variants]/(main)/settings/_layout/Desktop/Header';
+import HeaderContent from '@/app/[variants]/(main)/chat/settings/features/HeaderContent';
+import BrandWatermark from '@/components/BrandWatermark';
+import PanelTitle from '@/components/PanelTitle';
 import { INBOX_SESSION_ID } from '@/const/session';
-import AgentChat from '@/features/AgentSetting/AgentChat';
-import AgentMeta from '@/features/AgentSetting/AgentMeta';
-import AgentModal from '@/features/AgentSetting/AgentModal';
-import AgentOpening from '@/features/AgentSetting/AgentOpening';
-import AgentPlugin from '@/features/AgentSetting/AgentPlugin';
-import AgentPrompt from '@/features/AgentSetting/AgentPrompt';
+import { isDesktop } from '@/const/version';
+import { AgentCategory, AgentSettings as Settings } from '@/features/AgentSetting';
 import { AgentSettingsProvider } from '@/features/AgentSetting/AgentSettingsProvider';
-import AgentTTS from '@/features/AgentSetting/AgentTTS';
+import { TITLE_BAR_HEIGHT } from '@/features/ElectronTitlebar';
 import Footer from '@/features/Setting/Footer';
 import { useInitAgentConfig } from '@/hooks/useInitAgentConfig';
 import { useAgentStore } from '@/store/agent';
@@ -24,33 +21,111 @@ import { agentSelectors } from '@/store/agent/slices/chat';
 import { ChatSettingsTabs } from '@/store/global/initialState';
 import { useSessionStore } from '@/store/session';
 import { sessionMetaSelectors } from '@/store/session/selectors';
+import { LobeSessionType } from '@/types/session';
 
-import CategoryContent from './CategoryContent';
+export interface AgentSettingsProps {
+  agentId?: string;
+  onClose?: () => void;
+  open?: boolean;
+}
 
-const AgentSettings = memo(() => {
+/**
+ * Support both agent ID and session ID
+ * Consider choose agent id first, since
+ * session ID will soon be deprecated
+ */
+const AgentSettings = memo<AgentSettingsProps>(({ agentId, onClose, open }) => {
   const { t } = useTranslation('setting');
-  const id = useSessionStore((s) => s.activeId);
-  const config = useAgentStore(agentSelectors.currentAgentConfig, isEqual);
-  const meta = useSessionStore(sessionMetaSelectors.currentAgentMeta, isEqual);
 
-  const { isLoading } = useInitAgentConfig();
-  const [showAgentSetting, updateAgentConfig] = useAgentStore((s) => [
+  // Use provided agentId or fall back to current active session
+  const activeId = useSessionStore((s) => s.activeId);
+  const id = agentId || activeId;
+
+  // Get agent config and meta based on the provided or active agent ID
+  const config = useAgentStore((s) => {
+    if (agentId) {
+      // Use the new selector that works with agent IDs
+      return agentSelectors.getAgentConfigByAgentId(agentId)(s);
+    } else if (id) {
+      // Use the existing selector for session IDs
+      return agentSelectors.getAgentConfigById(id)(s);
+    } else {
+      // Use current agent config
+      return agentSelectors.currentAgentConfig(s);
+    }
+  }, isEqual);
+  const meta = useSessionStore((s) => {
+    if (agentId) {
+      // Use the selector that works with agent IDs
+      return sessionMetaSelectors.getAgentMetaByAgentId(agentId)(s);
+    } else {
+      // Use current agent meta for session-based access
+      return sessionMetaSelectors.currentAgentMeta(s);
+    }
+  }, isEqual);
+
+  const { isLoading } = useInitAgentConfig(agentId);
+
+  // Handle global store state or use props
+  const [showAgentSetting, globalUpdateAgentConfig] = useAgentStore((s) => [
     s.showAgentSetting,
     s.updateAgentConfig,
   ]);
-  const [updateAgentMeta] = useSessionStore((s) => [
+  const [globalUpdateAgentMeta] = useSessionStore((s) => [
     s.updateSessionMeta,
     sessionMetaSelectors.currentAgentTitle(s),
   ]);
+
+  // Create custom update functions that can target specific sessions
+  const updateAgentConfig = async (config: any) => {
+    if (agentId) {
+      // Find the agent session ID from the agent ID
+      const sessions = useSessionStore.getState().sessions || [];
+      const agentSession = sessions.find(
+        (session) => session.type === LobeSessionType.Agent && session.config?.id === agentId,
+      );
+
+      if (agentSession) {
+        // Use the internal agent store function with the specific session ID
+        await useAgentStore.getState().internal_updateAgentConfig(agentSession.id, config);
+      }
+    } else {
+      // Use the global update function for current session
+      await globalUpdateAgentConfig(config);
+    }
+  };
+
+  const updateAgentMeta = async (meta: any) => {
+    if (agentId) {
+      // Find the agent session ID from the agent ID
+      const sessions = useSessionStore.getState().sessions || [];
+      const agentSession = sessions.find(
+        (session) => session.type === LobeSessionType.Agent && session.config?.id === agentId,
+      );
+
+      if (agentSession) {
+        // Use the session service directly with the specific session ID
+        const { sessionService } = await import('@/services/session');
+        await sessionService.updateSessionMeta(agentSession.id, meta);
+        // Refresh sessions to update the UI
+        await useSessionStore.getState().refreshSessions();
+      }
+    } else {
+      // Use the global update function for current session
+      await globalUpdateAgentMeta(meta);
+    }
+  };
+
+  // Determine visibility - use prop if provided, otherwise use global state
+  const isOpen = open !== undefined ? open : showAgentSetting;
+
+  // Handle close - use prop if provided, otherwise use global state setter
+  const handleClose = onClose || (() => useAgentStore.setState({ showAgentSetting: false }));
+
   const isInbox = id === INBOX_SESSION_ID;
 
   const [tab, setTab] = useState(isInbox ? ChatSettingsTabs.Prompt : ChatSettingsTabs.Meta);
 
-  const ref = useRef<any>(null);
-  const theme = useTheme();
-  const { md = true, mobile = false } = useResponsive();
-
-  const category = <CategoryContent setTab={setTab} tab={tab} />;
   return (
     <AgentSettingsProvider
       config={config}
@@ -61,57 +136,50 @@ const AgentSettings = memo(() => {
       onMetaChange={updateAgentMeta}
     >
       <Drawer
-        height={'100vh'}
-        onClose={() => {
-          useAgentStore.setState({ showAgentSetting: false });
-        }}
-        open={showAgentSetting}
+        containerMaxWidth={1280}
+        height={isDesktop ? `calc(100vh - ${TITLE_BAR_HEIGHT}px)` : '100vh'}
+        noHeader
+        onClose={handleClose}
+        open={isOpen}
         placement={'bottom'}
+        sidebar={
+          <Flexbox
+            gap={20}
+            style={{
+              height: 'calc(100vh - 28px)',
+            }}
+          >
+            <PanelTitle desc={t('header.sessionDesc')} title={t('header.session')} />
+            <Flexbox flex={1} width={'100%'}>
+              <AgentCategory setTab={setTab} tab={tab} />
+            </Flexbox>
+            <Flexbox align={'center'} gap={8} paddingInline={8} width={'100%'}>
+              <HeaderContent modal />
+            </Flexbox>
+            <BrandWatermark paddingInline={12} />
+          </Flexbox>
+        }
+        sidebarWidth={280}
         styles={{
-          body: { padding: 0 },
-          content: {
-            background: theme.colorBgContainer,
+          sidebarContent: {
+            gap: 48,
+            justifyContent: 'space-between',
+            minHeight: isDesktop ? `calc(100% - ${TITLE_BAR_HEIGHT}px)` : '100%',
+            paddingBlock: 24,
+            paddingInline: 48,
           },
         }}
-        title={t('header.session')}
       >
-        <Flexbox height={'100%'} horizontal={md} ref={ref} width={'100%'}>
-          {md ? (
-            <Flexbox padding={16}>{category}</Flexbox>
-          ) : (
-            <Header
-              getContainer={() => ref.current}
-              title={t(`agentTab.${tab as ChatSettingsTabs}`)}
-            >
-              {category}
-            </Header>
-          )}
-          <Flexbox
-            align={'center'}
-            gap={mobile ? 0 : 64}
-            paddingInline={mobile ? 0 : 56}
-            style={{
-              background: mobile
-                ? theme.colorBgContainer
-                : theme.isDarkMode
-                  ? theme.colorFillQuaternary
-                  : theme.colorBgElevated,
-              minHeight: '100%',
-              overflowX: 'hidden',
-              overflowY: 'auto',
-              paddingTop: mobile ? 0 : 16,
-            }}
-            width={'100%'}
-          >
-            {tab === ChatSettingsTabs.Meta && <AgentMeta />}
-            {tab === ChatSettingsTabs.Prompt && <AgentPrompt />}
-            {tab === ChatSettingsTabs.Opening && <AgentOpening />}
-            {tab === ChatSettingsTabs.Chat && <AgentChat />}
-            {tab === ChatSettingsTabs.Modal && <AgentModal />}
-            {tab === ChatSettingsTabs.TTS && <AgentTTS />}
-            {tab === ChatSettingsTabs.Plugin && <AgentPlugin />} <Footer />
-          </Flexbox>
-        </Flexbox>
+        <Settings
+          config={config}
+          id={id}
+          loading={isLoading}
+          meta={meta}
+          onConfigChange={updateAgentConfig}
+          onMetaChange={updateAgentMeta}
+          tab={tab}
+        />
+        <Footer />
       </Drawer>
     </AgentSettingsProvider>
   );

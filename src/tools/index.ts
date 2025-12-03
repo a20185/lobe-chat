@@ -1,9 +1,11 @@
+import { LobeBuiltinTool } from '@lobechat/types';
+
 import { isDesktop } from '@/const/version';
-import { LobeBuiltinTool } from '@/types/tool';
 
 import { ArtifactsManifest } from './artifacts';
+import { CodeInterpreterManifest } from './code-interpreter';
 import { DalleManifest } from './dalle';
-import { LocalFilesManifest } from './local-files';
+import { LocalSystemManifest } from './local-system';
 import { WebBrowsingManifest } from './web-browsing';
 
 export const builtinTools: LobeBuiltinTool[] = [
@@ -19,14 +21,19 @@ export const builtinTools: LobeBuiltinTool[] = [
   },
   {
     hidden: !isDesktop,
-    identifier: LocalFilesManifest.identifier,
-    manifest: LocalFilesManifest,
+    identifier: LocalSystemManifest.identifier,
+    manifest: LocalSystemManifest,
     type: 'builtin',
   },
   {
     hidden: true,
     identifier: WebBrowsingManifest.identifier,
     manifest: WebBrowsingManifest,
+    type: 'builtin',
+  },
+  {
+    identifier: CodeInterpreterManifest.identifier,
+    manifest: CodeInterpreterManifest,
     type: 'builtin',
   },
 ];

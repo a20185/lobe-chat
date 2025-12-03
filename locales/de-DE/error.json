@@ -66,6 +66,7 @@
     "429": "Entschuldigung, Ihre Anfrage ist zu häufig. Der Server ist etwas überlastet. Bitte versuchen Sie es später erneut",
     "431": "Entschuldigung, der Header Ihrer Anfrage ist zu groß und kann vom Server nicht verarbeitet werden",
     "451": "Entschuldigung, aus rechtlichen Gründen verweigert der Server die Bereitstellung dieser Ressource",
+    "499": "Es tut uns leid, Ihre Anfrage wurde unerwartet unterbrochen, während sie vom Server verarbeitet wurde. Dies könnte daran liegen, dass Sie die Aktion manuell abgebrochen haben oder die Netzwerkverbindung instabil ist. Bitte überprüfen Sie den Netzwerkstatus und versuchen Sie es erneut.",
     "500": "Entschuldigung, der Server hat anscheinend einige Schwierigkeiten und kann Ihre Anfrage vorübergehend nicht bearbeiten. Bitte versuchen Sie es später erneut",
     "501": "Es tut uns leid, der Server weiß noch nicht, wie er diese Anfrage bearbeiten soll. Bitte überprüfen Sie, ob Ihre Aktion korrekt ist.",
     "502": "Entschuldigung, der Server scheint die Orientierung verloren zu haben und kann vorübergehend keinen Service bereitstellen. Bitte versuchen Sie es später erneut",
@@ -76,16 +77,36 @@
     "507": "Es tut uns leid, der Server hat nicht genügend Speicherplatz, um Ihre Anfrage zu bearbeiten. Bitte versuchen Sie es später erneut.",
     "509": "Es tut uns leid, die Bandbreite des Servers ist erschöpft. Bitte versuchen Sie es später erneut.",
     "510": "Es tut uns leid, der Server unterstützt die angeforderte Erweiterungsfunktion nicht. Bitte wenden Sie sich an den Administrator.",
-    "524": "Es tut uns leid, der Server hat beim Warten auf eine Antwort die Zeit überschritten, möglicherweise aufgrund einer zu langsamen Antwort. Bitte versuchen Sie es später erneut.",
+    "520": "Es tut uns leid, der Server hat ein unerwartetes Problem festgestellt, das die Erfüllung Ihrer Anfrage verhindert. Bitte versuchen Sie es später erneut, wir arbeiten daran, dieses Problem zu beheben.",
+    "522": "Es tut uns leid, die Serververbindung hat aufgrund einer Zeitüberschreitung nicht rechtzeitig auf Ihre Anfrage reagiert. Möglicherweise ist das Netzwerk instabil oder der Server vorübergehend nicht erreichbar. Bitte versuchen Sie es später erneut, wir arbeiten daran, den Dienst wiederherzustellen.",
+    "524": "Es tut uns leid, der Server hat beim Warten auf eine Antwort eine Zeitüberschreitung erreicht, möglicherweise aufgrund einer langsamen Antwort. Bitte versuchen Sie es später erneut.",
     "AgentRuntimeError": "Es ist ein Fehler bei der Ausführung des Lobe-Sprachmodells aufgetreten. Bitte überprüfen Sie die folgenden Informationen oder versuchen Sie es erneut.",
+    "ComfyUIBizError": "Fehler bei der Anfrage an den ComfyUI-Dienst. Bitte überprüfe die folgenden Informationen oder versuche es erneut.",
+    "ComfyUIEmptyResult": "ComfyUI hat kein Bild generiert. Bitte überprüfe die Modellkonfiguration oder versuche es erneut.",
+    "ComfyUIModelError": "Laden des ComfyUI-Modells fehlgeschlagen. Bitte überprüfe, ob die Modellsdatei vorhanden ist.",
+    "ComfyUIServiceUnavailable": "Verbindung zum ComfyUI-Dienst fehlgeschlagen. Bitte stelle sicher, dass ComfyUI ordnungsgemäß läuft und die Dienstadresse korrekt konfiguriert ist.",
+    "ComfyUIUploadFailed": "Hochladen des Bildes zu ComfyUI fehlgeschlagen. Bitte überprüfe die Serververbindung oder versuche es erneut.",
+    "ComfyUIWorkflowError": "Ausführung des ComfyUI-Workflows fehlgeschlagen. Bitte überprüfe die Workflow-Konfiguration.",
     "ConnectionCheckFailed": "Die Anfrage brachte eine leere Antwort zurück. Bitte überprüfen Sie, ob die API-Proxy-Adresse am Ende nicht mit `/v1` endet.",
     "CreateMessageError": "Es tut uns leid, die Nachricht konnte nicht erfolgreich gesendet werden. Bitte kopieren Sie den Inhalt und senden Sie ihn erneut. Nach dem Aktualisieren der Seite wird diese Nachricht nicht gespeichert.",
     "ExceededContextWindow": "Der aktuelle Anfrageinhalt überschreitet die von dem Modell verarbeitbare Länge. Bitte reduzieren Sie die Menge des Inhalts und versuchen Sie es erneut.",
     "FreePlanLimit": "Sie sind derzeit ein kostenloser Benutzer und können diese Funktion nicht nutzen. Bitte aktualisieren Sie auf ein kostenpflichtiges Abonnement, um fortzufahren.",
+    "GoogleAIBlockReason": {
+      "BLOCKLIST": "Ihr Inhalt enthält verbotene Wörter. Bitte prüfen und ändern Sie Ihre Eingabe und versuchen Sie es erneut.",
+      "IMAGE_SAFETY": "Die Bildgenerierung wurde aus Sicherheitsgründen blockiert. Bitte passen Sie Ihre Anfrage zur Bildgenerierung an und versuchen Sie es erneut.",
+      "LANGUAGE": "Die von Ihnen verwendete Sprache wird derzeit nicht unterstützt. Bitte versuchen Sie es erneut auf Englisch oder in einer anderen unterstützten Sprache.",
+      "OTHER": "Der Inhalt wurde aus unbekannten Gründen blockiert. Bitte formulieren Sie Ihre Anfrage neu.",
+      "PROHIBITED_CONTENT": "Ihre Anfrage könnte verbotene Inhalte enthalten. Bitte passen Sie Ihre Anfrage an und stellen Sie sicher, dass sie den Nutzungsrichtlinien entspricht.",
+      "RECITATION": "Ihr Inhalt wurde wegen möglicher Urheberrechtsverletzungen blockiert. Bitte verwenden Sie Originalinhalte oder formulieren Sie Ihre Anfrage um.",
+      "SAFETY": "Ihr Inhalt wurde aufgrund von Sicherheitsrichtlinien blockiert. Bitte passen Sie Ihre Anfrage an und vermeiden Sie potenziell schädliche oder unangemessene Inhalte.",
+      "SPII": "Ihr Inhalt könnte sensible personenbezogene Daten enthalten. Zum Schutz der Privatsphäre entfernen Sie bitte diese Informationen und versuchen Sie es erneut.",
+      "default": "Inhalt blockiert: {{blockReason}}. Bitte passen Sie Ihre Anfrage an und versuchen Sie es erneut."
+    },
     "InsufficientQuota": "Es tut uns leid, das Kontingent (Quota) für diesen Schlüssel ist erreicht. Bitte überprüfen Sie Ihr Kontoguthaben oder erhöhen Sie das Kontingent des Schlüssels und versuchen Sie es erneut.",
     "InvalidAccessCode": "Das Passwort ist ungültig oder leer. Bitte geben Sie das richtige Zugangspasswort ein oder fügen Sie einen benutzerdefinierten API-Schlüssel hinzu.",
     "InvalidBedrockCredentials": "Die Bedrock-Authentifizierung ist fehlgeschlagen. Bitte überprüfen Sie AccessKeyId/SecretAccessKey und versuchen Sie es erneut.",
     "InvalidClerkUser": "Entschuldigung, du bist derzeit nicht angemeldet. Bitte melde dich an oder registriere ein Konto, um fortzufahren.",
+    "InvalidComfyUIArgs": "ComfyUI-Konfiguration ist ungültig. Bitte überprüfe die Einstellungen und versuche es erneut.",
     "InvalidGithubToken": "Der persönliche Zugriffstoken für Github ist ungültig oder leer. Bitte überprüfen Sie den persönlichen Zugriffstoken für Github und versuchen Sie es erneut.",
     "InvalidOllamaArgs": "Ollama-Konfiguration ist ungültig. Bitte überprüfen Sie die Ollama-Konfiguration und versuchen Sie es erneut.",
     "InvalidProviderAPIKey": "{{provider}} API-Schlüssel ist ungültig oder leer. Bitte überprüfen Sie den {{provider}} API-Schlüssel und versuchen Sie es erneut.",
@@ -120,6 +141,10 @@
   "stt": {
     "responseError": "Serviceanfrage fehlgeschlagen. Bitte überprüfen Sie die Konfiguration oder versuchen Sie es erneut"
   },
+  "supervisor": {
+    "decisionFailed": "Der Gruppenleiter kann nicht arbeiten. Bitte überprüfen Sie Ihre Leiterkonfiguration und stellen Sie sicher, dass das richtige Modell, der API-Schlüssel und die API-Adresse korrekt konfiguriert sind."
+  },
+  "testConnectionFailed": "Verbindungstest fehlgeschlagen: {{error}}",
   "tts": {
     "responseError": "Serviceanfrage fehlgeschlagen. Bitte überprüfen Sie die Konfiguration oder versuchen Sie es erneut"
   },
@@ -127,9 +152,15 @@
     "addProxyUrl": "Fügen Sie die OpenAI-Proxy-URL hinzu (optional)",
     "apiKey": {
       "description": "Geben Sie Ihren {{name}} API-Schlüssel ein, um die Sitzung zu starten.",
+      "imageGenerationDescription": "Geben Sie Ihren {{name}} API-Schlüssel ein, um mit der Generierung zu beginnen",
       "title": "Verwenden Sie Ihren benutzerdefinierten {{name}} API-Schlüssel"
     },
     "closeMessage": "Hinweis schließen",
+    "comfyui": {
+      "description": "Bitte gib die korrekten {{name}}-Authentifizierungsinformationen ein, um mit der Bildgenerierung zu beginnen.",
+      "modifyBaseUrl": "ComfyUI-Dienstadresse ändern",
+      "title": "Bestätige deine {{name}}-Authentifizierungsinformationen"
+    },
     "confirm": "Bestätigen und erneut versuchen",
     "oauth": {
       "description": "Der Administrator hat die einheitliche Anmeldeauthentifizierung aktiviert. Klicken Sie unten auf die Schaltfläche, um sich anzumelden und die App zu entsperren.",

@@ -1,15 +1,15 @@
-import { Icon, Tooltip } from '@lobehub/ui';
-import { Button, Checkbox } from 'antd';
+import { Button, Tooltip } from '@lobehub/ui';
+import { Checkbox } from 'antd';
 import { createStyles } from 'antd-style';
 import dayjs from 'dayjs';
 import relativeTime from 'dayjs/plugin/relativeTime';
 import { isNull } from 'lodash-es';
 import { FileBoxIcon } from 'lucide-react';
-import { useRouter } from 'next/navigation';
 import { rgba } from 'polished';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Center, Flexbox } from 'react-layout-kit';
+import { useSearchParams } from 'react-router-dom';
 
 import FileIcon from '@/components/FileIcon';
 import { fileManagerSelectors, useFileStore } from '@/store/file';
@@ -35,6 +35,7 @@ const useStyles = createStyles(({ css, token, cx, isDarkMode }) => {
       cursor: pointer;
       margin-inline: 24px;
       border-block-end: 1px solid ${isDarkMode ? token.colorSplit : rgba(token.colorSplit, 0.06)};
+      border-radius: ${token.borderRadius}px;
 
       &:hover {
         background: ${token.colorFillTertiary};
@@ -78,7 +79,7 @@ const useStyles = createStyles(({ css, token, cx, isDarkMode }) => {
 interface FileRenderItemProps extends FileListItem {
   index: number;
   knowledgeBaseId?: string;
-  onSelectedChange: (id: string, selected: boolean) => void;
+  onSelectedChange: (id: string, selected: boolean, shiftKey: boolean, index: number) => void;
   selected?: boolean;
 }
 
@@ -99,10 +100,11 @@ const FileRenderItem = memo<FileRenderItemProps>(
     chunkingStatus,
     onSelectedChange,
     knowledgeBaseId,
+    index,
   }) => {
     const { t } = useTranslation('components');
     const { styles, cx } = useStyles();
-    const router = useRouter();
+    const [, setSearchParams] = useSearchParams();
     const [isCreatingFileParseTask, parseFiles] = useFileStore((s) => [
       fileManagerSelectors.isCreatingFileParseTask(id)(s),
       s.parseFilesToChunks,
@@ -121,6 +123,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
         className={cx(styles.container, selected && styles.selected)}
         height={64}
         horizontal
+        paddingInline={8}
       >
         <Flexbox
           align={'center'}
@@ -129,7 +132,14 @@ const FileRenderItem = memo<FileRenderItemProps>(
           flex={1}
           horizontal
           onClick={() => {
-            router.push(`/files/${id}`);
+            setSearchParams(
+              (prev) => {
+                const newParams = new URLSearchParams(prev);
+                newParams.set('file', id);
+                return newParams;
+              },
+              { replace: true },
+            );
           }}
         >
           <Flexbox align={'center'} horizontal>
@@ -138,7 +148,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
               onClick={(e) => {
                 e.stopPropagation();
 
-                onSelectedChange(id, !selected);
+                onSelectedChange(id, !selected, e.shiftKey, index);
               }}
               style={{ paddingInline: 4 }}
             >
@@ -173,7 +183,7 @@ const FileRenderItem = memo<FileRenderItemProps>(
                 >
                   <Button
                     disabled={!isSupportedForChunking}
-                    icon={<Icon icon={FileBoxIcon} />}
+                    icon={FileBoxIcon}
                     loading={isCreatingFileParseTask}
                     onClick={() => {
                       parseFiles([id]);

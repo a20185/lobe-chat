@@ -4,10 +4,10 @@ import { StateCreator } from 'zustand/vanilla';
 
 import { message } from '@/components/AntdStaticMethods';
 import { LOBE_CHAT_CLOUD } from '@/const/branding';
-import { isServerMode } from '@/const/version';
 import { fileService } from '@/services/file';
 import { uploadService } from '@/services/upload';
 import { FileMetadata, UploadFileItem } from '@/types/files';
+import { getImageDimensions } from '@/utils/client/imageDimensions';
 
 import { FileStore } from '../../store';
 
@@ -37,6 +37,10 @@ interface UploadWithProgressParams {
 }
 
 interface UploadWithProgressResult {
+  dimensions?: {
+    height: number;
+    width: number;
+  };
   filename?: string;
   id: string;
   url: string;
@@ -62,6 +66,9 @@ export const createFileUploadSlice: StateCreator<
   FileUploadAction
 > = () => ({
   uploadBase64FileWithProgress: async (base64) => {
+    // Extract image dimensions from base64 data
+    const dimensions = await getImageDimensions(base64);
+
     const { metadata, fileType, size, hash } = await uploadService.uploadBase64ToS3(base64);
 
     const res = await fileService.createFile({
@@ -72,18 +79,21 @@ export const createFileUploadSlice: StateCreator<
       size: size,
       url: metadata.path,
     });
-    return { ...res, filename: metadata.filename };
+    return { ...res, dimensions, filename: metadata.filename };
   },
   uploadWithProgress: async ({ file, onStatusUpdate, knowledgeBaseId, skipCheckFileType }) => {
     const fileArrayBuffer = await file.arrayBuffer();
 
-    // 1. check file hash
+    // 1. extract image dimensions if applicable
+    const dimensions = await getImageDimensions(file);
+
+    // 2. check file hash
     const hash = sha256(fileArrayBuffer);
 
     const checkStatus = await fileService.checkFileHash(hash);
     let metadata: FileMetadata;
 
-    // 2. if file exist, just skip upload
+    // 3. if file exist, just skip upload
     if (checkStatus.isExist) {
       metadata = checkStatus.metadata as FileMetadata;
       onStatusUpdate?.({
@@ -92,21 +102,10 @@ export const createFileUploadSlice: StateCreator<
         value: { status: 'processing', uploadState: { progress: 100, restTime: 0, speed: 0 } },
       });
     }
-    // 2. if file don't exist, need upload files
+    // 3. if file don't exist, need upload files
     else {
-      // if is server mode, upload to server s3, or upload to client s3
-      if (isServerMode) {
-        metadata = await uploadService.uploadWithProgress(file, {
-          onProgress: (status, upload) => {
-            onStatusUpdate?.({
-              id: file.name,
-              type: 'updateFile',
-              value: { status: status === 'success' ? 'processing' : status, uploadState: upload },
-            });
-          },
-        });
-      } else {
-        if (!skipCheckFileType && !file.type.startsWith('image')) {
+      const { data, success } = await uploadService.uploadFileToS3(file, {
+        onNotSupported: () => {
           onStatusUpdate?.({ id: file.name, type: 'removeFile' });
           message.info({
             content: t('upload.fileOnlySupportInServerMode', {
@@ -116,15 +115,22 @@ export const createFileUploadSlice: StateCreator<
             }),
             duration: 5,
           });
-          return;
-        }
+        },
+        onProgress: (status, upload) => {
+          onStatusUpdate?.({
+            id: file.name,
+            type: 'updateFile',
+            value: { status: status === 'success' ? 'processing' : status, uploadState: upload },
+          });
+        },
+        skipCheckFileType,
+      });
+      if (!success) return;
 
-        // Upload to the indexeddb in the browser
-        metadata = await uploadService.uploadToClientS3(hash, file);
-      }
+      metadata = data;
     }
 
-    // 3. use more powerful file type detector to get file type
+    // 4. use more powerful file type detector to get file type
     let fileType = file.type;
 
     if (!file.type) {
@@ -134,7 +140,7 @@ export const createFileUploadSlice: StateCreator<
       fileType = type?.mime || 'text/plain';
     }
 
-    // 4. create file to db
+    // 5. create file to db
     const data = await fileService.createFile(
       {
         fileType,
@@ -142,7 +148,7 @@ export const createFileUploadSlice: StateCreator<
         metadata,
         name: file.name,
         size: file.size,
-        url: metadata.path,
+        url: metadata.path || checkStatus.url,
       },
       knowledgeBaseId,
     );
@@ -158,6 +164,6 @@ export const createFileUploadSlice: StateCreator<
       },
     });
 
-    return { ...data, filename: file.name };
+    return { ...data, dimensions, filename: file.name };
   },
 });

@@ -1,3 +1,4 @@
+import { UIChatMessage } from '@lobechat/types';
 import { act, renderHook } from '@testing-library/react';
 import { Mock, beforeEach, describe, expect, it, vi } from 'vitest';
 
@@ -7,7 +8,6 @@ import { useAgentStore } from '@/store/agent';
 import { agentSelectors } from '@/store/agent/selectors';
 import { chatSelectors } from '@/store/chat/selectors';
 import { systemAgentSelectors } from '@/store/user/selectors';
-import { ChatMessage } from '@/types/message';
 import { QueryRewriteSystemAgent } from '@/types/user/settings';
 
 import { useChatStore } from '../../../../store';
@@ -49,7 +49,7 @@ describe('chatRAG actions', () => {
       act(() => {
         useChatStore.setState({
           messagesMap: {
-            default: [{ id: messageId }] as ChatMessage[],
+            default: [{ id: messageId }] as UIChatMessage[],
           },
         });
       });
@@ -75,7 +75,7 @@ describe('chatRAG actions', () => {
           ({
             id: messageId,
             ragQuery: existingRagQuery,
-          }) as ChatMessage,
+          }) as UIChatMessage,
       );
 
       // Mock the semantic search response
@@ -117,7 +117,7 @@ describe('chatRAG actions', () => {
         () =>
           ({
             id: messageId,
-          }) as ChatMessage,
+          }) as UIChatMessage,
       );
 
       // Mock the rewrite query function
@@ -197,13 +197,13 @@ describe('chatRAG actions', () => {
       expect(result.current.internal_shouldUseRAG()).toBe(true);
     });
 
-    it('should return true if has user files', () => {
+    it('should return false if has user files', () => {
       const { result } = renderHook(() => useChatStore());
 
       vi.spyOn(agentSelectors, 'hasEnabledKnowledge').mockReturnValue(false);
       vi.spyOn(chatSelectors, 'currentUserFiles').mockReturnValue([{ id: 'file-1' }] as any);
 
-      expect(result.current.internal_shouldUseRAG()).toBe(true);
+      expect(result.current.internal_shouldUseRAG()).toBeFalsy();
     });
 
     it('should return false if no knowledge or files', () => {
@@ -240,12 +240,12 @@ describe('chatRAG actions', () => {
           ({
             id: messageId,
             content,
-          }) as ChatMessage,
+          }) as UIChatMessage,
       );
 
       vi.spyOn(chatSelectors, 'mainAIChatsWithHistoryConfig').mockReturnValue([
         { content: 'history' },
-      ] as ChatMessage[]);
+      ] as UIChatMessage[]);
 
       const rewriteSpy = vi.spyOn(result.current, 'internal_rewriteQuery');
       const deleteSpy = vi.spyOn(result.current, 'deleteUserMessageRagQuery');

@@ -1,5 +1,3 @@
-import { lambdaClient } from '@/libs/trpc/client';
-import { uploadService } from '@/services/upload';
 import {
   CreateNewEvalDatasets,
   CreateNewEvalEvaluation,
@@ -7,7 +5,10 @@ import {
   RAGEvalDataSetItem,
   RAGEvalEvaluationItem,
   insertEvalDatasetsSchema,
-} from '@/types/eval';
+} from '@lobechat/types';
+
+import { lambdaClient } from '@/libs/trpc/client';
+import { uploadService } from '@/services/upload';
 
 class RAGEvalService {
   // Dataset
@@ -40,7 +41,7 @@ class RAGEvalService {
   };
 
   importDatasetRecords = async (datasetId: number, file: File): Promise<void> => {
-    const { path } = await uploadService.uploadWithProgress(file, { directory: 'ragEval' });
+    const { path } = await uploadService.uploadToServerS3(file, { directory: 'ragEval' });
 
     await lambdaClient.ragEval.importDatasetRecords.mutate({ datasetId, pathname: path });
   };

@@ -29,15 +29,28 @@ const Layout = memo(({ children, mobile }: ProviderMenuProps) => {
 
   useFetchAiProviderList();
 
-  const width = mobile ? undefined : 260;
+  const width = mobile ? undefined : 280;
   return (
-    <Flexbox style={{ minWidth: width, overflow: mobile ? undefined : 'scroll' }} width={width}>
+    <Flexbox
+      style={{
+        background: theme.colorBgLayout,
+        borderRight: `1px solid ${theme.colorBorderSecondary}`,
+        minWidth: width,
+        overflow: mobile ? undefined : 'scroll',
+      }}
+      width={width}
+    >
       <Flexbox
         gap={8}
         horizontal
         justify={'space-between'}
         padding={'16px 12px 12px'}
-        style={{ background: theme.colorBgLayout, position: 'sticky', top: 0, zIndex: 50 }}
+        style={{
+          background: theme.colorBgLayout,
+          position: 'sticky',
+          top: 0,
+          zIndex: 50,
+        }}
         width={'100%'}
       >
         <SearchBar
@@ -45,8 +58,8 @@ const Layout = memo(({ children, mobile }: ProviderMenuProps) => {
           onChange={(e) => useAiInfraStore.setState({ providerSearchKeyword: e.target.value })}
           placeholder={t('menu.searchProviders')}
           style={{ width: '100%' }}
-          type={'block'}
           value={providerSearchKeyword}
+          variant={'filled'}
         />
         <AddNew />
       </Flexbox>
@@ -55,26 +68,27 @@ const Layout = memo(({ children, mobile }: ProviderMenuProps) => {
   );
 });
 
-const Content = () => {
+const ProviderMenu = ({
+  mobile,
+  onProviderSelect = () => {},
+}: {
+  mobile?: boolean;
+  onProviderSelect?: (providerKey: string) => void;
+}) => {
   const [initAiProviderList, providerSearchKeyword] = useAiInfraStore((s) => [
     s.initAiProviderList,
     s.providerSearchKeyword,
   ]);
 
+  let Content = <ProviderList mobile={mobile} onProviderSelect={onProviderSelect} />;
+
   // loading
-  if (!initAiProviderList) return <SkeletonList />;
+  if (!initAiProviderList) Content = <SkeletonList />;
 
   // search
-  if (!!providerSearchKeyword) return <SearchResult />;
+  if (!!providerSearchKeyword) Content = <SearchResult onProviderSelect={onProviderSelect} />;
 
-  // default
-  return <ProviderList />;
+  return <Layout mobile={mobile}>{Content}</Layout>;
 };
-
-const ProviderMenu = ({ mobile }: { mobile?: boolean }) => (
-  <Layout mobile={mobile}>
-    <Content />
-  </Layout>
-);
 
 export default ProviderMenu;

@@ -1,20 +1,26 @@
 'use client';
 
-import { ActionIcon, ChatHeader, ChatHeaderTitle } from '@lobehub/ui';
+import { ActionIcon } from '@lobehub/ui';
+import { ChatHeader } from '@lobehub/ui/chat';
 import { Drawer, type DrawerProps } from 'antd';
 import { createStyles } from 'antd-style';
 import { Menu } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 import { ReactNode, memo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import BrandWatermark from '@/components/BrandWatermark';
+import { useActiveSettingsKey } from '@/hooks/useActiveTabKey';
+import { useProviderName } from '@/hooks/useProviderName';
+import { SettingsTabs } from '@/store/global/initialState';
 
 const useStyles = createStyles(({ token, css }) => ({
   container: css`
     position: relative;
     flex: none;
     height: 54px;
-    background: ${token.colorBgContainer};
+    background: ${token.colorBgLayout};
   `,
   title: css`
     font-size: 18px;
@@ -25,32 +31,46 @@ const useStyles = createStyles(({ token, css }) => ({
 
 interface HeaderProps extends Pick<DrawerProps, 'getContainer'> {
   children: ReactNode;
-  title: ReactNode;
+  title?: ReactNode;
 }
 
 const Header = memo<HeaderProps>(({ children, getContainer, title }) => {
   const [open, setOpen] = useState(false);
   const { styles, theme } = useStyles();
+  const activeKey = useActiveSettingsKey();
+  const providerName = useProviderName(activeKey);
+
+  const search = useSearchParams();
+  const active = search.get('active');
+  const { t } = useTranslation('setting');
+
+  const isProvider = active === SettingsTabs.Provider;
+  const dynamicTitle = title ? title : isProvider ? providerName : t(`tab.${activeKey}`);
 
   return (
     <>
       <ChatHeader
         className={styles.container}
         left={
-          <ChatHeaderTitle
+          <ChatHeader.Title
             title={
               <Flexbox align={'center'} className={styles.title} gap={4} horizontal>
                 <ActionIcon
                   color={theme.colorText}
                   icon={Menu}
                   onClick={() => setOpen(true)}
-                  size={{ blockSize: 32, fontSize: 18 }}
+                  size={{ blockSize: 32, size: 18 }}
                 />
-                {title}
+                {dynamicTitle}
               </Flexbox>
             }
           />
         }
+        styles={{
+          left: {
+            padding: 0,
+          },
+        }}
       />
       <Drawer
         getContainer={getContainer}
@@ -60,7 +80,7 @@ const Header = memo<HeaderProps>(({ children, getContainer, title }) => {
         placement={'left'}
         rootStyle={{ position: 'absolute' }}
         style={{
-          background: theme.colorBgContainer,
+          background: theme.colorBgLayout,
           borderRight: `1px solid ${theme.colorSplit}`,
         }}
         styles={{

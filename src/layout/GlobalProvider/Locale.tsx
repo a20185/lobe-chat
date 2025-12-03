@@ -9,6 +9,8 @@ import { createI18nNext } from '@/locales/create';
 import { isOnServerSide } from '@/utils/env';
 import { getAntdLocale } from '@/utils/locale';
 
+import Editor from './Editor';
+
 const updateDayjs = async (lang: string) => {
   // load default lang
   let dayJSLocale;
@@ -38,7 +40,8 @@ const Locale = memo<LocaleLayoutProps>(({ children, defaultLang, antdLocale }) =
 
   // if run on server side, init i18n instance everytime
   if (isOnServerSide) {
-    i18n.init();
+    // use sync mode to init instantly
+    i18n.init({ initAsync: false });
 
     // load the dayjs locale
     // if (lang) {
@@ -80,8 +83,18 @@ const Locale = memo<LocaleLayoutProps>(({ children, defaultLang, antdLocale }) =
   const documentDir = isRtlLang(lang!) ? 'rtl' : 'ltr';
 
   return (
-    <ConfigProvider direction={documentDir} locale={locale}>
-      {children}
+    <ConfigProvider
+      direction={documentDir}
+      locale={locale}
+      theme={{
+        components: {
+          Button: {
+            contentFontSizeSM: 12,
+          },
+        },
+      }}
+    >
+      <Editor>{children}</Editor>
     </ConfigProvider>
   );
 });

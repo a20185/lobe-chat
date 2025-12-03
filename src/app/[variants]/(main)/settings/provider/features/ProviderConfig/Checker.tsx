@@ -1,31 +1,34 @@
 'use client';
 
 import { CheckCircleFilled } from '@ant-design/icons';
+import { ChatMessageError, TraceNameMap } from '@lobechat/types';
 import { ModelIcon } from '@lobehub/icons';
-import { Alert, Highlighter, Icon } from '@lobehub/ui';
-import { Button, Select, Space } from 'antd';
+import { Alert, Button, Highlighter, Icon, Select } from '@lobehub/ui';
 import { useTheme } from 'antd-style';
 import { Loader2Icon } from 'lucide-react';
 import { ReactNode, memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { TraceNameMap } from '@/const/trace';
 import { useProviderName } from '@/hooks/useProviderName';
 import { chatService } from '@/services/chat';
 import { aiModelSelectors, aiProviderSelectors, useAiInfraStore } from '@/store/aiInfra';
-import { ChatMessageError } from '@/types/message';
 
 const Error = memo<{ error: ChatMessageError }>(({ error }) => {
   const { t } = useTranslation('error');
   const providerName = useProviderName(error.body?.provider);
 
   return (
-    <Flexbox gap={8} style={{ width: '100%' }}>
+    <Flexbox gap={8} style={{ maxWidth: 600, width: '100%' }}>
       <Alert
         extra={
           <Flexbox>
-            <Highlighter copyButtonSize={'small'} language={'json'} type={'pure'}>
+            <Highlighter
+              actionIconSize={'small'}
+              language={'json'}
+              variant={'borderless'}
+              wrap={true}
+            >
               {JSON.stringify(error.body || error, null, 2)}
             </Highlighter>
           </Flexbox>
@@ -47,11 +50,13 @@ export type CheckErrorRender = (props: {
 interface ConnectionCheckerProps {
   checkErrorRender?: CheckErrorRender;
   model: string;
+  onAfterCheck: () => Promise<void>;
+  onBeforeCheck: () => Promise<void>;
   provider: string;
 }
 
 const Checker = memo<ConnectionCheckerProps>(
-  ({ model, provider, checkErrorRender: CheckErrorRender }) => {
+  ({ model, provider, checkErrorRender: CheckErrorRender, onBeforeCheck, onAfterCheck }) => {
     const { t } = useTranslation('setting');
 
     const isProviderConfigUpdating = useAiInfraStore(
@@ -72,7 +77,7 @@ const Checker = memo<ConnectionCheckerProps>(
       // Clear previous check results immediately
       setPass(false);
       setError(undefined);
-      
+
       let isError = false;
 
       await chatService.fetchPresetTaskResult({
@@ -126,7 +131,7 @@ const Checker = memo<ConnectionCheckerProps>(
 
     return (
       <Flexbox gap={8}>
-        <Space.Compact block>
+        <Flexbox gap={8} horizontal>
           <Select
             listItemHeight={36}
             onSelect={async (value) => {
@@ -145,14 +150,29 @@ const Checker = memo<ConnectionCheckerProps>(
               );
             }}
             options={totalModels.map((id) => ({ label: id, value: id }))}
+            style={{
+              flex: 1,
+              overflow: 'hidden',
+            }}
             suffixIcon={isProviderConfigUpdating && <Icon icon={Loader2Icon} spin />}
             value={checkModel}
             virtual
           />
-          <Button disabled={isProviderConfigUpdating} loading={loading} onClick={checkConnection}>
+          <Button
+            disabled={isProviderConfigUpdating}
+            loading={loading}
+            onClick={async () => {
+              await onBeforeCheck();
+              try {
+                await checkConnection();
+              } finally {
+                await onAfterCheck();
+              }
+            }}
+          >
             {t('llm.checker.button')}
           </Button>
-        </Space.Compact>
+        </Flexbox>
 
         {pass && (
           <Flexbox gap={4} horizontal>

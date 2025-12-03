@@ -1,5 +1,5 @@
-import { Modal } from '@lobehub/ui';
-import { Button, FormInstance } from 'antd';
+import { Button, Modal } from '@lobehub/ui';
+import { FormInstance } from 'antd';
 import { memo, use, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
@@ -30,7 +30,7 @@ const ModelConfigModal = memo<ModelConfigModalProps>(({ open, setOpen }) => {
 
   return (
     <Modal
-      destroyOnClose
+      destroyOnHidden
       footer={[
         <Button key="cancel" onClick={closeModal}>
           {t('cancel', { ns: 'common' })}
@@ -64,6 +64,13 @@ const ModelConfigModal = memo<ModelConfigModalProps>(({ open, setOpen }) => {
       maskClosable
       onCancel={closeModal}
       open={open}
+      styles={{
+        content: {
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: 'calc(100vh - 150px)',
+        },
+      }}
       title={t('providerModels.createNew.title')}
       zIndex={1251} // Select is 1150
     >

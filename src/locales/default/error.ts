@@ -66,6 +66,7 @@ export default {
     429: '很抱歉，您的请求太多，服务器有点累了，请稍后再试',
     431: '很抱歉，您的请求头字段太大，服务器无法处理',
     451: '很抱歉，由于法律原因，服务器拒绝提供此资源',
+    499: '很抱歉，您的请求在服务器处理中被意外中断，可能是因为您主动取消了操作或网络连接不稳定。请检查网络状况后重试。',
     500: '很抱歉，服务器似乎遇到了一些困难，暂时无法完成您的请求，请稍后再试',
     501: '很抱歉，服务器还不知道如何处理这个请求，请确认您的操作是否正确',
     502: '很抱歉，服务器似乎迷失了方向，暂时无法提供服务，请稍后再试',
@@ -76,6 +77,8 @@ export default {
     507: '很抱歉，服务器存储空间不足，无法处理您的请求，请稍后再试',
     509: '很抱歉，服务器的带宽已用尽，请稍后再试',
     510: '很抱歉，服务器不支持请求的扩展功能，请联系管理员',
+    520: '很抱歉，服务器遇到了一个意外的问题，导致无法完成您的请求。请稍后再试，我们正努力解决这个问题。',
+    522: '很抱歉，服务器连接超时，未能及时响应您的请求。可能是网络不稳定或服务器暂时无法访问。请稍后再试，我们正在努力恢复服务。',
     524: '很抱歉，服务器在等回复时超时了，可能是因为响应太慢，请稍后再试',
 
     /* eslint-disable sort-keys-fix/sort-keys-fix */
@@ -117,6 +120,18 @@ export default {
     PermissionDenied: '很抱歉，你没有权限访问该服务，请检查你的密钥是否有访问权限',
     InvalidProviderAPIKey: '{{provider}} API Key 不正确或为空，请检查 {{provider}} API Key 后重试',
     ProviderBizError: '请求 {{provider}} 服务出错，请根据以下信息排查或重试',
+
+    GoogleAIBlockReason: {
+      BLOCKLIST: '您的内容包含被禁止的词汇。请检查并修改您的输入内容后重试。',
+      IMAGE_SAFETY: '生成的图像内容因安全原因被阻止。请尝试修改您的图像生成请求。',
+      LANGUAGE: '您使用的语言暂不被支持。请尝试使用英语或其他支持的语言重新提问。',
+      OTHER: '内容因未知原因被阻止。请尝试重新表述您的请求。',
+      PROHIBITED_CONTENT: '您的请求可能包含违禁内容。请调整您的请求，确保内容符合使用规范。',
+      RECITATION: '您的内容因可能涉及版权问题而被阻止。请尝试使用原创内容或重新表述您的请求。',
+      SAFETY: '您的内容因安全策略而被阻止。请尝试调整您的请求内容，避免包含可能的有害或不当内容。',
+      SPII: '您的内容可能包含敏感个人身份信息。为保护隐私，请移除相关敏感信息后重试。',
+      default: '内容被阻止：{{blockReason}}。请调整您的请求内容后重试。',
+    },
     /**
      * @deprecated
      */
@@ -131,6 +146,15 @@ export default {
     OllamaBizError: '请求 Ollama 服务出错，请根据以下信息排查或重试',
     OllamaServiceUnavailable:
       'Ollama 服务连接失败，请检查 Ollama 是否运行正常，或是否正确设置 Ollama 的跨域配置',
+
+    InvalidComfyUIArgs: 'ComfyUI 配置不正确，请检查 ComfyUI 配置后重试',
+    ComfyUIBizError: '请求 ComfyUI 服务出错，请根据以下信息排查或重试',
+    ComfyUIServiceUnavailable:
+      'ComfyUI 服务连接失败，请检查 ComfyUI 是否运行正常，或检查服务地址配置是否正确',
+    ComfyUIEmptyResult: 'ComfyUI 未生成任何图像，请检查模型配置或重试',
+    ComfyUIUploadFailed: 'ComfyUI 图片上传失败，请检查服务器连接或重试',
+    ComfyUIWorkflowError: 'ComfyUI 工作流执行失败，请检查工作流配置',
+    ComfyUIModelError: 'ComfyUI 模型加载失败，请检查模型文件是否存在',
 
     AgentRuntimeError: 'Lobe AI Runtime 执行出错，请根据以下信息排查或重试',
 
@@ -148,6 +172,11 @@ export default {
   stt: {
     responseError: '服务请求失败，请检查配置或重试',
   },
+  supervisor: {
+    decisionFailed:
+      '群组主持人无法工作。请检查你的主持人配置，确保配置了正确的模型、API Key 和 API 地址。',
+  },
+  testConnectionFailed: '测试连接失败：{{error}}',
   tts: {
     responseError: '服务请求失败，请检查配置或重试',
   },
@@ -155,9 +184,15 @@ export default {
     addProxyUrl: '添加 OpenAI 代理地址（可选）',
     apiKey: {
       description: '输入你的 {{name}} API Key 即可开始会话',
+      imageGenerationDescription: '输入你的 {{name}} API Key 即可开始生成',
       title: '使用自定义 {{name}} API Key',
     },
     closeMessage: '关闭提示',
+    comfyui: {
+      description: '请输入正确的 {{name}} 认证信息即可开始生图',
+      modifyBaseUrl: '修改 Comfy UI 服务地址',
+      title: '确认你的 {{name}} 认证信息',
+    },
     confirm: '确认并重试',
     oauth: {
       description: '管理员已开启统一登录认证，点击下方按钮登录，即可解锁应用',

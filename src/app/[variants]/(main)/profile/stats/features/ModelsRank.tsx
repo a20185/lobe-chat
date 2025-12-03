@@ -1,3 +1,4 @@
+import { ModelRankItem } from '@lobechat/types';
 import { BarList } from '@lobehub/charts';
 import { ModelIcon } from '@lobehub/icons';
 import { ActionIcon, FormGroup, Modal } from '@lobehub/ui';
@@ -9,7 +10,6 @@ import { Flexbox } from 'react-layout-kit';
 import { FORM_STYLE } from '@/const/layoutTokens';
 import { useClientDataSWR } from '@/libs/swr';
 import { messageService } from '@/services/message';
-import { ModelRankItem } from '@/types/message';
 
 export const TopicsRank = memo(() => {
   const [open, setOpen] = useState(false);
@@ -38,13 +38,13 @@ export const TopicsRank = memo(() => {
             <ActionIcon
               icon={MaximizeIcon}
               onClick={() => setOpen(true)}
-              size={{ blockSize: 28, fontSize: 20 }}
+              size={{ blockSize: 28, size: 20 }}
             />
           ) : undefined
         }
         style={FORM_STYLE.style}
         title={t('stats.modelsRank.title')}
-        variant={'pure'}
+        variant={'borderless'}
       >
         <Flexbox horizontal paddingBlock={16}>
           <BarList

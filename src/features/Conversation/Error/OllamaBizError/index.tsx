@@ -1,14 +1,13 @@
+import { UIChatMessage } from '@lobechat/types';
 import { Skeleton } from 'antd';
 import dynamic from 'next/dynamic';
 import { memo } from 'react';
-
-import { ChatMessage } from '@/types/message';
 
 import ErrorJsonViewer from '../ErrorJsonViewer';
 
 const loading = () => <Skeleton active style={{ width: 300 }} />;
 
-const SetupGuide = dynamic(() => import('./SetupGuide'), { loading, ssr: false });
+const SetupGuide = dynamic(() => import('@/features/OllamaSetupGuide'), { loading, ssr: false });
 
 const InvalidModel = dynamic(() => import('./InvalidOllamaModel'), { loading, ssr: false });
 
@@ -25,7 +24,7 @@ interface OllamaErrorResponse {
 
 const UNRESOLVED_MODEL_REGEXP = /model "([\w+,-_]+)" not found/;
 
-const OllamaBizError = memo<ChatMessage>(({ error, id }) => {
+const OllamaBizError = memo<UIChatMessage>(({ error, id }) => {
   const errorBody: OllamaErrorResponse = (error as any)?.body;
 
   const errorMessage = errorBody.error?.message;
@@ -38,7 +37,7 @@ const OllamaBizError = memo<ChatMessage>(({ error, id }) => {
 
   // error of not enable model or not set the CORS rules
   if (errorMessage?.includes('Failed to fetch')) {
-    return <SetupGuide />;
+    return <SetupGuide id={id} />;
   }
 
   return <ErrorJsonViewer error={error} id={id} />;

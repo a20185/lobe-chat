@@ -1,4 +1,3 @@
-import { appEnv } from '@/config/app';
 import { BRANDING_LOGO_URL, BRANDING_NAME, ORG_NAME } from '@/const/branding';
 import { DEFAULT_LANG } from '@/const/locale';
 import { OFFICIAL_URL, OG_URL } from '@/const/url';
@@ -7,10 +6,7 @@ import { translation } from '@/server/translation';
 import { DynamicLayoutProps } from '@/types/next';
 import { RouteVariants } from '@/utils/server/routeVariants';
 
-const BASE_PATH = appEnv.NEXT_PUBLIC_BASE_PATH;
-
-// if there is a base path, then we don't need the manifest
-const noManifest = !!BASE_PATH;
+const isDev = process.env.NODE_ENV === 'development';
 
 export const generateMetadata = async (props: DynamicLayoutProps) => {
   const locale = await RouteVariants.getLocale(props);
@@ -29,10 +25,10 @@ export const generateMetadata = async (props: DynamicLayoutProps) => {
       ? BRANDING_LOGO_URL
       : {
           apple: '/apple-touch-icon.png?v=1',
-          icon: '/favicon.ico?v=1',
-          shortcut: '/favicon-32x32.ico?v=1',
+          icon: isDev ? '/favicon-dev.ico' : '/favicon.ico?v=1',
+          shortcut: isDev ? '/favicon-32x32-dev.ico' : '/favicon-32x32.ico?v=1',
         },
-    manifest: noManifest ? undefined : '/manifest.json',
+    manifest: '/manifest.json',
     metadataBase: new URL(OFFICIAL_URL),
     openGraph: {
       description: t('chat.description', { appName: BRANDING_NAME }),

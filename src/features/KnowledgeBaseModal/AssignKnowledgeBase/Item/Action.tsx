@@ -1,5 +1,4 @@
-import { ActionIcon, Icon } from '@lobehub/ui';
-import { Button, Dropdown } from 'antd';
+import { ActionIcon, Button, Dropdown, Icon } from '@lobehub/ui';
 import { InfoIcon, MoreVerticalIcon, Trash2 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -65,11 +64,11 @@ const Actions = memo<ActionsProps>(({ id, type, enabled }) => {
                 label: t('knowledgeBase.library.action.detail'),
                 onClick: () => {
                   if (type === KnowledgeType.KnowledgeBase) {
-                    window.open(`/repos/${id}`);
+                    window.open(`/knowledge/bases/${id}`);
                     return;
                   }
 
-                  window.open(`/files/${id}`);
+                  window.open(`/knowledge?file=${id}`);
                 },
               },
               {

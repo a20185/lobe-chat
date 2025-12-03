@@ -1,12 +1,15 @@
+import type {
+  ChatModelCard,
+  EnabledProviderWithModels,
+  GlobalLLMProviderKey,
+  ModelProviderCard,
+} from '@lobechat/types';
+import { ServerModelProviderConfig } from '@lobechat/types';
 import { uniqBy } from 'lodash-es';
 
 import { filterEnabledModels } from '@/config/modelProviders';
-import { EnabledProviderWithModels } from '@/types/aiProvider';
-import { ChatModelCard, ModelProviderCard } from '@/types/llm';
-import { ServerModelProviderConfig } from '@/types/serverConfig';
-import { GlobalLLMProviderKey } from '@/types/user/settings';
+import type { UserStore } from '@/store/user';
 
-import { UserStore } from '../../../store';
 import { currentSettings, getProviderConfigById } from '../../settings/selectors/settings';
 
 /**
@@ -108,10 +111,13 @@ const modelProviderListForModelSelect = (s: UserStore): EnabledProviderWithModel
       source: 'builtin',
     }));
 
-const getModelCardById = (id: string) => (s: UserStore) => {
+const getModelCardById = (id: string, provider?: GlobalLLMProviderKey) => (s: UserStore) => {
   const list = modelProviderList(s);
 
-  return list.flatMap((i) => i.chatModels).find((m) => m.id === id);
+  return list
+    .filter((i) => !provider || i.id === provider)
+    .flatMap((i) => i.chatModels)
+    .find((m) => m.id === id);
 };
 
 const isModelEnabledFunctionCall = (id: string) => (s: UserStore) =>

@@ -2,7 +2,7 @@
 
 import { SearchBar } from '@lobehub/ui';
 import { useQueryState } from 'nuqs';
-import { memo, useState } from 'react';
+import { memo, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { useUserStore } from '@/store/user';
@@ -14,30 +14,30 @@ const FilesSearchBar = memo<{ mobile?: boolean }>(({ mobile }) => {
   const hotkey = useUserStore(settingsSelectors.getHotkeyById(HotkeyEnum.Search));
   const [keywords, setKeywords] = useState<string>('');
 
-  const [, setQuery] = useQueryState('q', {
+  const [query, setQuery] = useQueryState('q', {
     clearOnDefault: true,
   });
+
+  // Sync local state with URL query parameter
+  useEffect(() => {
+    setKeywords(query || '');
+  }, [query]);
 
   return (
     <SearchBar
       allowClear
       enableShortKey={!mobile}
-      // loading={isValidating}
       onChange={(e) => {
         setKeywords(e.target.value);
-
-        if (!e.target.value) {
-          setQuery(null);
-        }
+        if (!e.target.value) setQuery(null);
       }}
-      onPressEnter={() => {
-        setQuery(keywords);
-      }}
+      onPressEnter={() => setQuery(keywords)}
       placeholder={t('searchFilePlaceholder')}
       shortKey={hotkey}
       spotlight={!mobile}
       style={{ width: 320 }}
       value={keywords}
+      variant={'filled'}
     />
   );
 });

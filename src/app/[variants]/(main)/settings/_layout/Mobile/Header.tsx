@@ -1,13 +1,12 @@
 'use client';
 
-import { MobileNavBar, MobileNavBarTitle } from '@lobehub/ui';
-import { Tag } from 'antd';
+import { ChatHeader } from '@lobehub/ui/mobile';
+import { useQueryState } from 'nuqs';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
 import { enableAuth } from '@/const/auth';
-import { useActiveSettingsKey } from '@/hooks/useActiveTabKey';
 import { useQueryRoute } from '@/hooks/useQueryRoute';
 import { useShowMobileWorkspace } from '@/hooks/useShowMobileWorkspace';
 import { SettingsTabs } from '@/store/global/initialState';
@@ -16,31 +15,35 @@ import { mobileHeaderSticky } from '@/styles/mobileHeader';
 
 const Header = memo(() => {
   const { t } = useTranslation('setting');
-
   const router = useQueryRoute();
   const showMobileWorkspace = useShowMobileWorkspace();
-  const activeSettingsKey = useActiveSettingsKey();
+
+  const [activeSettingsKey, setActiveSettingsKey] = useQueryState('active');
+  const [providerName, setProviderName] = useQueryState('provider');
+
   const isSessionActive = useSessionStore((s) => !!s.activeId);
+  const isProvider = providerName ? true : false;
 
   const handleBackClick = () => {
     if (isSessionActive && showMobileWorkspace) {
       router.push('/chat');
+    } else if (activeSettingsKey === 'provider' && providerName !== null) {
+      setProviderName(null);
+      setActiveSettingsKey('provider');
     } else {
       router.push(enableAuth ? '/me/settings' : '/me');
     }
   };
+
   return (
-    <MobileNavBar
+    <ChatHeader
       center={
-        <MobileNavBarTitle
+        <ChatHeader.Title
           title={
             <Flexbox align={'center'} gap={8} horizontal>
-              <span style={{ lineHeight: 1.2 }}> {t(`tab.${activeSettingsKey}`)}</span>
-              {activeSettingsKey === SettingsTabs.Sync && (
-                <Tag bordered={false} color={'warning'}>
-                  {t('tab.experiment')}
-                </Tag>
-              )}
+              <span style={{ lineHeight: 1.2 }}>
+                {isProvider ? providerName : t(`tab.${activeSettingsKey as SettingsTabs}`)}
+              </span>
             </Flexbox>
           }
         />

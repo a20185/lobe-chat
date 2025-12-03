@@ -28,14 +28,14 @@ const CreateGroupModal = memo<CreateGroupModalProps>(
       <div onClick={(e) => e.stopPropagation()}>
         <Modal
           allowFullscreen
-          destroyOnClose
+          destroyOnHidden
           okButtonProps={{ loading }}
           onCancel={(e) => {
             setInput('');
             onCancel?.(e);
           }}
           onOk={async (e: MouseEvent<HTMLButtonElement>) => {
-            if (input.length === 0 || input.length > 20)
+            if (input.length === 0 || input.length > 20 || input.trim() === '')
               return message.warning(t('sessionGroup.tooLong'));
 
             setLoading(true);

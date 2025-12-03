@@ -1,14 +1,18 @@
-import { ActionIcon, Icon, Tooltip } from '@lobehub/ui';
-import { Dropdown, MenuProps, Upload } from 'antd';
+import { validateVideoFileSize } from '@lobechat/utils/client';
+import { MenuProps, Tooltip } from '@lobehub/ui';
+import { Upload } from 'antd';
 import { css, cx } from 'antd-style';
 import { FileUp, FolderUp, ImageUp, Paperclip } from 'lucide-react';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 
+import { message } from '@/components/AntdStaticMethods';
 import { useModelSupportVision } from '@/hooks/useModelSupportVision';
 import { useAgentStore } from '@/store/agent';
-import { agentSelectors } from '@/store/agent/slices/chat';
+import { agentSelectors } from '@/store/agent/selectors';
 import { useFileStore } from '@/store/file';
+
+import Action from '../components/Action';
 
 const hotArea = css`
   &::before {
@@ -32,7 +36,7 @@ const FileUpload = memo(() => {
   const items: MenuProps['items'] = [
     {
       disabled: !canUploadImage,
-      icon: <Icon icon={ImageUp} style={{ fontSize: '16px' }} />,
+      icon: ImageUp,
       key: 'upload-image',
       label: canUploadImage ? (
         <Upload
@@ -54,12 +58,24 @@ const FileUpload = memo(() => {
       ),
     },
     {
-      icon: <Icon icon={FileUp} style={{ fontSize: '16px' }} />,
+      icon: FileUp,
       key: 'upload-file',
       label: (
         <Upload
           beforeUpload={async (file) => {
-            if (!canUploadImage && file.type.startsWith('image')) return false;
+            if (!canUploadImage && (file.type.startsWith('image') || file.type.startsWith('video')))
+              return false;
+
+            // Validate video file size
+            const validation = validateVideoFileSize(file);
+            if (!validation.isValid) {
+              message.error(
+                t('upload.validation.videoSizeExceeded', {
+                  actualSize: validation.actualSize,
+                }),
+              );
+              return false;
+            }
 
             await upload([file]);
 
@@ -73,12 +89,24 @@ const FileUpload = memo(() => {
       ),
     },
     {
-      icon: <Icon icon={FolderUp} style={{ fontSize: '16px' }} />,
+      icon: FolderUp,
       key: 'upload-folder',
       label: (
         <Upload
           beforeUpload={async (file) => {
-            if (!canUploadImage && file.type.startsWith('image')) return false;
+            if (!canUploadImage && (file.type.startsWith('image') || file.type.startsWith('video')))
+              return false;
+
+            // Validate video file size
+            const validation = validateVideoFileSize(file);
+            if (!validation.isValid) {
+              message.error(
+                t('upload.validation.videoSizeExceeded', {
+                  actualSize: validation.actualSize,
+                }),
+              );
+              return false;
+            }
 
             await upload([file]);
 
@@ -95,9 +123,14 @@ const FileUpload = memo(() => {
   ];
 
   return (
-    <Dropdown menu={{ items }} placement="top">
-      <ActionIcon icon={Paperclip} placement={'bottom'} title={t('upload.action.tooltip')} />
-    </Dropdown>
+    <Action
+      dropdown={{
+        menu: { items },
+      }}
+      icon={Paperclip}
+      showTooltip={false}
+      title={t('upload.action.tooltip')}
+    />
   );
 });
 

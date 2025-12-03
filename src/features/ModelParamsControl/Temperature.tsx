@@ -34,23 +34,26 @@ const Warning = memo(() => {
         message={t('settingModel.temperature.warning')}
         style={{ fontSize: 12 }}
         type={'warning'}
-        variant={'pure'}
+        variant={'borderless'}
       />
     )
   );
 });
 
 interface TemperatureProps {
+  disabled?: boolean;
   onChange?: (value: number) => void;
   value?: number;
 }
 
-const Temperature = memo<TemperatureProps>(({ value, onChange }) => {
+const Temperature = memo<TemperatureProps>(({ value, onChange, disabled }) => {
   const theme = useTheme();
   return (
-    <Flexbox gap={4} style={{ paddingInlineStart: 8 }}>
+    <Flexbox gap={4} style={{ width: '100%' }}>
       <SliderWithInput
+        changeOnWheel
         controls={false}
+        disabled={disabled}
         marks={{
           0: <Icon icon={Sparkle} size={'small'} style={{ color: theme.colorTextQuaternary }} />,
           1: <div />,
@@ -60,10 +63,15 @@ const Temperature = memo<TemperatureProps>(({ value, onChange }) => {
         onChange={onChange}
         size={'small'}
         step={0.1}
-        style={{ height: 48 }}
+        style={{ height: 42 }}
+        styles={{
+          input: {
+            maxWidth: 43,
+          },
+        }}
         value={value}
       />
-      <Warning />
+      {!disabled && <Warning />}
     </Flexbox>
   );
 });

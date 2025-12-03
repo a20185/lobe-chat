@@ -1,5 +1,7 @@
-import { Alert, CopyButton, Highlighter, Icon, Markdown } from '@lobehub/ui';
-import { Descriptions, Segmented, Typography } from 'antd';
+import { CrawlResult } from '@lobechat/types';
+import { CrawlSuccessResult } from '@lobechat/web-crawler';
+import { Alert, CopyButton, Highlighter, Icon, Markdown, Segmented, Text } from '@lobehub/ui';
+import { Descriptions } from 'antd';
 import { createStyles } from 'antd-style';
 import { ExternalLink } from 'lucide-react';
 import Link from 'next/link';
@@ -7,8 +9,7 @@ import { memo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
 
-import { CRAWL_CONTENT_LIMITED_COUNT } from '@/tools/web-browsing/const';
-import { CrawlResult } from '@/types/tool/crawler';
+import { CRAWL_CONTENT_LIMITED_COUNT } from '../../const';
 
 const useStyles = createStyles(({ token, css }) => {
   return {
@@ -80,6 +81,11 @@ const useStyles = createStyles(({ token, css }) => {
   };
 });
 
+enum DisplayType {
+  Raw = 'raw',
+  Render = 'render',
+}
+
 interface PageContentProps {
   messageId: string;
   result?: CrawlResult;
@@ -88,7 +94,7 @@ interface PageContentProps {
 const PageContent = memo<PageContentProps>(({ result }) => {
   const { t } = useTranslation('plugin');
   const { styles } = useStyles();
-  const [display, setDisplay] = useState('render');
+  const [display, setDisplay] = useState<DisplayType>(DisplayType.Render);
 
   if (!result || !result.data) return undefined;
 
@@ -127,7 +133,7 @@ const PageContent = memo<PageContentProps>(({ result }) => {
     );
   }
 
-  const { url, title, description, content } = result.data;
+  const { url, title, description, content, siteName } = result.data as CrawlSuccessResult;
   return (
     <Flexbox gap={24}>
       <Flexbox gap={8}>
@@ -143,15 +149,12 @@ const PageContent = memo<PageContentProps>(({ result }) => {
           </Flexbox>
         </Flexbox>
         {description && (
-          <Typography.Paragraph
-            className={styles.description}
-            ellipsis={{ expandable: false, rows: 4 }}
-          >
+          <Text className={styles.description} ellipsis={{ rows: 4 }}>
             {description}
-          </Typography.Paragraph>
+          </Text>
         )}
         <Flexbox align={'center'} className={styles.url} gap={4} horizontal>
-          {result.data.siteName && <div>{result.data.siteName} · </div>}
+          {siteName && <div>{siteName} · </div>}
           <Link
             className={styles.url}
             href={url}
@@ -189,12 +192,13 @@ const PageContent = memo<PageContentProps>(({ result }) => {
         <Flexbox gap={12} paddingBlock={'0 12px'}>
           <Flexbox horizontal justify={'space-between'}>
             <Segmented
-              onChange={(value) => setDisplay(value)}
+              onChange={(value) => setDisplay(value as DisplayType)}
               options={[
-                { label: t('search.crawPages.detail.preview'), value: 'render' },
-                { label: t('search.crawPages.detail.raw'), value: 'raw' },
+                { label: t('search.crawPages.detail.preview'), value: DisplayType.Render },
+                { label: t('search.crawPages.detail.raw'), value: DisplayType.Raw },
               ]}
               value={display}
+              variant={'filled'}
             />
             <CopyButton content={content} />
           </Flexbox>
@@ -203,10 +207,10 @@ const PageContent = memo<PageContentProps>(({ result }) => {
               message={t('search.crawPages.detail.tooLong', {
                 characters: CRAWL_CONTENT_LIMITED_COUNT,
               })}
-              variant={'pure'}
+              variant={'borderless'}
             />
           )}
-          {display === 'render' ? (
+          {display === DisplayType.Render ? (
             <Markdown variant={'chat'}>{content}</Markdown>
           ) : (
             <div style={{ paddingBlock: '0 12px' }}>

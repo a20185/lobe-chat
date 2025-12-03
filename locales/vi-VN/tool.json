@@ -1,4 +1,11 @@
 {
+  "codeInterpreter": {
+    "error": "Lỗi thực thi",
+    "executing": "Đang thực thi...",
+    "files": "Tệp:",
+    "output": "Đầu ra:",
+    "returnValue": "Giá trị trả về:"
+  },
   "dalle": {
     "autoGenerate": "Tự động tạo",
     "downloading": "Liên kết hình ảnh được tạo bởi DallE3 chỉ có hiệu lực trong 1 giờ, đang tải hình ảnh xuống máy...",
@@ -54,7 +61,16 @@
       "title": "Công cụ tìm kiếm:"
     },
     "searchResult": "Số lượng tìm kiếm:",
-    "searchTimeRange": "Khoảng thời gian:",
+    "searchTimeRange": {
+      "title": "Khoảng thời gian:",
+      "value": {
+        "anytime": "Không giới hạn thời gian",
+        "day": "Trong một ngày",
+        "month": "Trong một tháng",
+        "week": "Trong một tuần",
+        "year": "Trong một năm"
+      }
+    },
     "summary": "Tóm tắt",
     "summaryTooltip": "Tóm tắt nội dung hiện tại",
     "viewMoreResults": "Xem thêm {{results}} kết quả"

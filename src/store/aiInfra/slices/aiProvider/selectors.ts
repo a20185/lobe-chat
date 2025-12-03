@@ -10,6 +10,8 @@ const enabledAiProviderList = (s: AIProviderStoreState) =>
 const disabledAiProviderList = (s: AIProviderStoreState) =>
   s.aiProviderList.filter((item) => !item.enabled);
 
+const enabledImageModelList = (s: AIProviderStoreState) => s.enabledImageModelList || [];
+
 const isProviderEnabled = (id: string) => (s: AIProviderStoreState) =>
   enabledAiProviderList(s).some((i) => i.id === id);
 
@@ -23,7 +25,7 @@ const activeProviderConfig = (s: AIProviderStoreState) => s.aiProviderDetail;
 const isAiProviderConfigLoading = (id: string) => (s: AIProviderStoreState) =>
   s.activeAiProvider !== id;
 
-const providerWhitelist = new Set(['ollama']);
+const providerWhitelist = new Set(['ollama', 'lmstudio']);
 
 const activeProviderKeyVaults = (s: AIProviderStoreState) => activeProviderConfig(s)?.keyVaults;
 
@@ -99,14 +101,29 @@ const isProviderHasBuiltinSearchConfig = (id: string) => (s: AIProviderStoreStat
   return !!providerCfg?.settings.searchMode && providerCfg?.settings.searchMode !== 'internal';
 };
 
+const isProviderEnableResponseApi = (id: string) => (s: AIProviderStoreState) => {
+  const providerCfg = providerConfigById(id)(s);
+
+  const enableResponseApi = providerCfg?.config?.enableResponseApi;
+
+  if (typeof enableResponseApi === 'boolean') return enableResponseApi;
+
+  return false;
+};
+
+const isInitAiProviderRuntimeState = (s: AIProviderStoreState) => !!s.isInitAiProviderRuntimeState;
+
 export const aiProviderSelectors = {
   activeProviderConfig,
   disabledAiProviderList,
   enabledAiProviderList,
+  enabledImageModelList,
   isActiveProviderApiKeyNotEmpty,
   isActiveProviderEndpointNotEmpty,
   isAiProviderConfigLoading,
+  isInitAiProviderRuntimeState,
   isProviderConfigUpdating,
+  isProviderEnableResponseApi,
   isProviderEnabled,
   isProviderFetchOnClient,
   isProviderHasBuiltinSearch,

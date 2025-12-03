@@ -1,7 +1,14 @@
 import { ProviderIcon } from '@lobehub/icons';
-import { FormModal, Icon } from '@lobehub/ui';
-import type { FormItemProps } from '@lobehub/ui/es/Form/components/FormItem';
-import { App, Input, Select } from 'antd';
+import {
+  type FormItemProps,
+  FormModal,
+  Icon,
+  Input,
+  InputPassword,
+  Select,
+  TextArea,
+} from '@lobehub/ui';
+import { App } from 'antd';
 import { BrainIcon } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { memo, useState } from 'react';
@@ -12,6 +19,7 @@ import { useAiInfraStore } from '@/store/aiInfra/store';
 import { CreateAiProviderParams } from '@/types/aiProvider';
 
 import { KeyVaultsConfigKey, LLMProviderApiTokenKey, LLMProviderBaseUrlKey } from '../../const';
+import { CUSTOM_PROVIDER_SDK_OPTIONS } from '../customProviderSdkOptions';
 
 interface CreateNewProviderProps {
   onClose?: () => void;
@@ -28,9 +36,15 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
     setLoading(true);
 
     try {
-      await createNewAiProvider(values);
+      // 如果 name 为空，使用 id 作为 name
+      const finalValues = {
+        ...values,
+        name: values.name || values.id,
+      };
+
+      await createNewAiProvider(finalValues);
       setLoading(false);
-      router.push(`/settings/provider/${values.id}`);
+      router.push(`/settings?active=provider&provider=${values.id}`);
       message.success(t('createNewAiProvider.createSuccess'));
       onClose?.();
     } catch (e) {
@@ -63,11 +77,10 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
       label: t('createNewAiProvider.name.title'),
       minWidth: 400,
       name: 'name',
-      rules: [{ message: t('createNewAiProvider.name.required'), required: true }],
     },
     {
       children: (
-        <Input.TextArea
+        <TextArea
           placeholder={t('createNewAiProvider.description.placeholder')}
           style={{ minHeight: 80 }}
           variant={'filled'}
@@ -95,12 +108,7 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
               {label}
             </Flexbox>
           )}
-          options={[
-            { label: 'OpenAI', value: 'openai' },
-            { label: 'Anthropic', value: 'anthropic' },
-            { label: 'Ollama', value: 'ollama' },
-            // { label: 'Azure AI', value: 'azureai' },
-          ]}
+          options={CUSTOM_PROVIDER_SDK_OPTIONS}
           placeholder={t('createNewAiProvider.sdkType.placeholder')}
           variant={'filled'}
         />
@@ -111,7 +119,7 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
       rules: [{ message: t('createNewAiProvider.sdkType.required'), required: true }],
     },
     {
-      children: <Input allowClear placeholder={'https://xxxx-proxy.com/v1'} variant={'filled'} />,
+      children: <Input allowClear placeholder={'https://xxxx-proxy.com/v1'} />,
       label: t('createNewAiProvider.proxyUrl.title'),
       minWidth: 400,
       name: [KeyVaultsConfigKey, LLMProviderBaseUrlKey],
@@ -119,7 +127,7 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
     },
     {
       children: (
-        <Input.Password
+        <InputPassword
           autoComplete={'new-password'}
           placeholder={t('createNewAiProvider.apiKey.placeholder')}
           variant={'filled'}
@@ -133,7 +141,7 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
 
   return (
     <FormModal
-      destroyOnClose
+      destroyOnHidden
       items={[
         {
           children: basicItems,
@@ -144,7 +152,6 @@ const CreateNewProvider = memo<CreateNewProviderProps>(({ onClose, open }) => {
           title: t('createNewAiProvider.configTitle'),
         },
       ]}
-      maxHeight={'90%'}
       onCancel={onClose}
       onFinish={onFinish}
       open={open}

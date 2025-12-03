@@ -1,7 +1,7 @@
-import { appEnv } from '@/config/app';
+import { LobeChatDatabase } from '@lobechat/database';
+
 import { SessionModel } from '@/database/models/session';
-import { LobeChatDatabase } from '@/database/type';
-import { parseAgentConfig } from '@/server/globalConfig/parseDefaultAgent';
+import { getServerDefaultAgentConfig } from '@/server/globalConfig';
 
 export class AgentService {
   private readonly userId: string;
@@ -14,9 +14,7 @@ export class AgentService {
 
   async createInbox() {
     const sessionModel = new SessionModel(this.db, this.userId);
-
-    const defaultAgentConfig = parseAgentConfig(appEnv.DEFAULT_AGENT_CONFIG) || {};
-
+    const defaultAgentConfig = getServerDefaultAgentConfig();
     await sessionModel.createInbox(defaultAgentConfig);
   }
 }

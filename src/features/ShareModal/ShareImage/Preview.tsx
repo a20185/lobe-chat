@@ -1,5 +1,6 @@
 import { ModelTag } from '@lobehub/icons';
-import { Avatar, ChatHeaderTitle, Markdown } from '@lobehub/ui';
+import { Avatar, Markdown } from '@lobehub/ui';
+import { ChatHeaderTitle } from '@lobehub/ui/chat';
 import { memo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Flexbox } from 'react-layout-kit';
@@ -21,7 +22,7 @@ const Preview = memo<FieldType & { title?: string }>(
   ({ title, withSystemRole, withBackground, withFooter }) => {
     const [model, plugins, systemRole] = useAgentStore((s) => [
       agentSelectors.currentAgentModel(s),
-      agentSelectors.currentAgentPlugins(s),
+      agentSelectors.displayableAgentPlugins(s),
       agentSelectors.currentAgentSystemRole(s),
     ]);
     const [isInbox, description, avatar, backgroundColor] = useSessionStore((s) => [
@@ -48,10 +49,10 @@ const Preview = memo<FieldType & { title?: string }>(
                 <ChatHeaderTitle
                   desc={displayDesc}
                   tag={
-                    <>
+                    <Flexbox gap={4} horizontal>
                       <ModelTag model={model} />
                       {plugins?.length > 0 && <PluginTag plugins={plugins} />}
-                    </>
+                    </Flexbox>
                   }
                   title={displayTitle}
                 />

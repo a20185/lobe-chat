@@ -81,7 +81,9 @@ const IndexCard = memo<IndexCardProps>(
       <Flexbox
         style={{
           marginBottom: !expand ? 12 : undefined,
+          maxWidth: '1024px',
           position: 'relative',
+          width: '100%',
         }}
       >
         <Flexbox
@@ -113,7 +115,7 @@ const IndexCard = memo<IndexCardProps>(
                     className={styles.more}
                     icon={ChevronRight}
                     onClick={onMoreClick}
-                    size={{ blockSize: 32, borderRadius: '50%', fontSize: 16 }}
+                    size={{ blockSize: 32, borderRadius: '50%', size: 16 }}
                     title={moreTooltip}
                   />
                 )}
@@ -129,7 +131,7 @@ const IndexCard = memo<IndexCardProps>(
             <ActionIcon
               icon={ChevronDown}
               onClick={onExpand}
-              size={{ blockSize: 24, borderRadius: '50%', fontSize: 16 }}
+              size={{ blockSize: 24, borderRadius: '50%', size: 16 }}
             />
           </Center>
         )}

@@ -1,4 +1,5 @@
-import { Icon, MobileTabBar, type MobileTabBarProps } from '@lobehub/ui';
+import { Icon } from '@lobehub/ui';
+import { TabBar, type TabBarProps } from '@lobehub/ui/mobile';
 import { createStyles } from 'antd-style';
 import { Bot, MessageSquare, User } from 'lucide-react';
 import { useRouter } from 'next/navigation';
@@ -27,11 +28,11 @@ export default memo<Props>(({ className, tabBarKey }) => {
   const { styles } = useStyles();
   const router = useRouter();
   const openSettings = () => {
-    router.push('/settings/llm');
+    router.push('/settings?active=llm');
   };
   const { showMarket } = useServerConfigStore(featureFlagsSelectors);
 
-  const items: MobileTabBarProps['items'] = useMemo(
+  const items: TabBarProps['items'] = useMemo(
     () =>
       [
         {
@@ -62,9 +63,9 @@ export default memo<Props>(({ className, tabBarKey }) => {
           onClick: openSettings,
           title: t('tab.setting'),
         },
-      ].filter(Boolean) as MobileTabBarProps['items'],
+      ].filter(Boolean) as TabBarProps['items'],
     [t],
   );
 
-  return <MobileTabBar activeKey={tabBarKey} className={className} items={items} safeArea />;
+  return <TabBar activeKey={tabBarKey} className={className} items={items} safeArea />;
 });
